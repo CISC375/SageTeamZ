@@ -1,4 +1,4 @@
-import { ButtonInteraction, Client, Message, MessageComponentInteraction, MessageReaction, TextChannel, User } from 'discord.js';
+import { ButtonInteraction, Client, Message, MessageComponentInteraction, MessageReaction, ModalActionRowComponent, ModalSubmitComponent, ModalSubmitInteraction, TextChannel, User } from 'discord.js';
 import { handleRpsOptionSelect } from '../commands/fun/rockpaperscissors';
 import { handlePollOptionSelect } from '../commands/fun/poll';
 import { SageInteractionType } from '@lib/types/InteractionType';
@@ -8,6 +8,7 @@ import { SageUser } from '../lib/types/SageUser';
 async function register(bot: Client): Promise<void> {
 	bot.on('interactionCreate', i => {
 		if (i.isMessageComponent()) routeComponentInteraction(bot, i);
+		if (i.isModalSubmit()) routeModalInteraction(bot, i);
 	});
 	// When creating a message this portion will run because it see's that message Reactions have been added and will trigger on the initial add of thumbs up and down
 	// need an if statement to verify the interaction just how the one above says i.isMessageComponent it could be the same but try different options
@@ -17,6 +18,16 @@ async function register(bot: Client): Promise<void> {
 async function routeComponentInteraction(bot: Client, i: MessageComponentInteraction) {
 	if (i.isButton()) handleBtnPress(bot, i);
 }
+
+// test modal input area
+async function routeModalInteraction(bot: Client, i: ModalSubmitInteraction) {
+	console.log('enter modal ', i.customId);
+	if (i.customId === 'recModal') {
+		const favoriteColor = i.fields.getTextInputValue('favoriteColor');
+		await i.reply(`Your favorite color is: ${favoriteColor}`);
+	}
+}
+// ////////////////////////////////////////
 
 export default register;
 function handleBtnPress(bot: Client, i: ButtonInteraction) {
