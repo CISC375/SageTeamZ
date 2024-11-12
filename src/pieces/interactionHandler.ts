@@ -5,6 +5,14 @@ import { SageInteractionType } from '@lib/types/InteractionType';
 import { BOT, CHANNELS, DB } from '@root/config';
 import { SageUser } from '../lib/types/SageUser';
 
+const RECOMMENDATION_RESPONSES_ACTIVE = [
+	' '
+];
+
+const RECOMMENDATION_RESPONSES_INACTIVE = [
+	''
+];
+
 async function register(bot: Client): Promise<void> {
 	const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 	client.on('ready', () => { recommendationService(client); });
@@ -21,11 +29,28 @@ async function register(bot: Client): Promise<void> {
 async function recommendationService(bot: Client) {
 	console.log(`ENTER READY!`);
 	const channelId = CHANNELS.ANNOUNCEMENTS;
+	const users = bot.users.cache;
+
+	console.log(`Number of cached users: ${users.size}`);
+	console.log('Retrieving Random User...');
+	const user = getRandomUser(bot);
+	console.log(`Retrieved User: ${user.displayName}`);
+
+	console.log('Working on User recommendation...');
+	recommendationHelper(bot, user);
 
 	const channel = bot.channels.cache.get(channelId);
 	// eslint-disable-next-line no-extra-parens
 	(channel as TextChannel).send('online');
 }
+
+function getRandomUser(bot: Client): User | null {
+	const users = Array.from(bot.users.cache.values());
+	return users[Math.floor(Math.random() * users.length)] || null;
+}
+
+function recommendationHelper(bot: Client, user: User) { return; }
+
 async function routeComponentInteraction(bot: Client, i: MessageComponentInteraction) {
 	if (i.isButton()) handleBtnPress(bot, i);
 }
