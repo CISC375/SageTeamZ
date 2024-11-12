@@ -118,7 +118,14 @@ async function main() {
 				activityType: 'join'
 			}],
 			feedbackLog: [],
-			personalizeRec: {}
+			personalizeRec: {
+				usertype: 'active',
+				mostusedCommand: '',
+				reccType: 'announcements',
+				frequency: 'aggressive',
+				tone: 'formal',
+				scheduled: 'random'
+			}
 		};
 		// ADDED MORE TO ACTIVITYLOG, TIMESTAMPARRAY, AND COMMANDUSAGE THEY ARE EXAMPLES OF HOW TO STORE (SET AS DEFAULTS RN)
 		/*

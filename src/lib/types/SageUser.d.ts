@@ -21,4 +21,5 @@ export interface SageUser {
 	timestampArray: Array<Array<Record<string, number>>>;
 	activityLog: Array<Record<string, unknown>>;
 	feedbackLog: Array<Record<string, unknown>>;
+	personalizeRec: Record<string, unknown>;
 }

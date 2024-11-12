@@ -21,10 +21,10 @@ async function routeComponentInteraction(bot: Client, i: MessageComponentInterac
 
 // test modal input area
 async function routeModalInteraction(bot: Client, i: ModalSubmitInteraction) {
-	console.log('enter modal ', i.customId);
+	console.log('enter modal ', i.customId, '   ', i.user.id);
 	if (i.customId === 'recModal') {
-		const favoriteColor = i.fields.getTextInputValue('favoriteColor');
-		await i.reply(`Your favorite color is: ${favoriteColor}`);
+		const toneSet = i.fields.getTextInputValue('tone');
+		await i.reply({ content: `Your favorite color is: ${toneSet}`, ephemeral: false });
 	}
 }
 // ////////////////////////////////////////
