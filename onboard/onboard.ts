@@ -117,7 +117,8 @@ async function main() {
 				activityDescription: 'Joined Server',
 				activityType: 'join'
 			}],
-			feedbackLog: []
+			feedbackLog: [],
+			personalizeRec: {}
 		};
 		// ADDED MORE TO ACTIVITYLOG, TIMESTAMPARRAY, AND COMMANDUSAGE THEY ARE EXAMPLES OF HOW TO STORE (SET AS DEFAULTS RN)
 		/*
@@ -150,6 +151,16 @@ async function main() {
 
 			activityLog will be an array of objects that will be utilized to track activity from users such as date, time, what used, etc from discord
 			feedbackLog will be an array of objects to track question and their response (WILL BE EMPTY ARRAY BUT PUSH AN OBJECT)
+
+			personalizeRec will be an object that will be used by a modal to then allow users to alter and change how they recieve messages and recommendations
+			this is where we will determine how the user will recieve specific messages and descriptions will go into the object
+			such as:
+			- type user (active, inactive)
+			- most used command type
+			- recommendation type (default server announcements ephemeral)(announcements, last channel, DM, no suggestions, etc)
+			- aggressive or not (timer could be different for everyone or whatnot)
+			- tone of messages (casual, formal)
+			- current frequency
 		*/
 
 		if (course) {
