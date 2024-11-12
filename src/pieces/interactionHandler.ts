@@ -1,11 +1,15 @@
-import { ButtonInteraction, Client, Message, MessageComponentInteraction, MessageReaction, TextChannel, User } from 'discord.js';
+import { ButtonInteraction, Client, Message, MessageComponentInteraction, MessageReaction, TextChannel, User, GatewayIntentBits } from 'discord.js';
 import { handleRpsOptionSelect } from '../commands/fun/rockpaperscissors';
 import { handlePollOptionSelect } from '../commands/fun/poll';
 import { SageInteractionType } from '@lib/types/InteractionType';
-import { DB } from '@root/config';
+import { BOT, CHANNELS, DB } from '@root/config';
 import { SageUser } from '../lib/types/SageUser';
 
 async function register(bot: Client): Promise<void> {
+	const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+	client.on('ready', () => { recommendationService(client); });
+	client.login(BOT.TOKEN);
+
 	bot.on('interactionCreate', i => {
 		if (i.isMessageComponent()) routeComponentInteraction(bot, i);
 	});
@@ -14,6 +18,14 @@ async function register(bot: Client): Promise<void> {
 	bot.on('messageReactionAdd', (reaction, user) => handleUserReaction(bot, reaction.message.embeds[0].description, reaction.emoji.name, user.id));
 }
 
+async function recommendationService(bot: Client) {
+	console.log(`ENTER READY!`);
+	const channelId = CHANNELS.ANNOUNCEMENTS;
+
+	const channel = bot.channels.cache.get(channelId);
+	// eslint-disable-next-line no-extra-parens
+	(channel as TextChannel).send('online');
+}
 async function routeComponentInteraction(bot: Client, i: MessageComponentInteraction) {
 	if (i.isButton()) handleBtnPress(bot, i);
 }
