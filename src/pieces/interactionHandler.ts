@@ -29,27 +29,34 @@ async function register(bot: Client): Promise<void> {
 async function recommendationService(bot: Client) {
 	console.log(`ENTER READY!`);
 	const channelId = CHANNELS.ANNOUNCEMENTS;
-	const users = bot.users.cache;
 
-	console.log(`Number of cached users: ${users.size}`);
 	console.log('Retrieving Random User...');
-	const user = getRandomUser(bot);
-	console.log(`Retrieved User: ${user.displayName}`);
+	const randomUser = await getRandomUser(bot);
+	console.log(`Retrieved User: ${randomUser.discordId}`);
 
 	console.log('Working on User recommendation...');
-	recommendationHelper(bot, user);
+	// recommendationHelper(bot, user);
 
 	const channel = bot.channels.cache.get(channelId);
 	// eslint-disable-next-line no-extra-parens
-	(channel as TextChannel).send('online');
+	// (channel as TextChannel).send('online');
 }
 
-function getRandomUser(bot: Client): User | null {
-	const users = Array.from(bot.users.cache.values());
-	return users[Math.floor(Math.random() * users.length)] || null;
+async function getRandomUser(bot: Client): Promise<SageUser | null> {
+	try {
+		const randomUser = await bot.mongo.collection(DB.USERS).aggregate([{ $sample: { size: 1 } }]).toArray();
+		return randomUser[0];
+	} catch (error) {
+		console.error('Error getting random user:', error);
+		return null;
+	}
 }
 
-function recommendationHelper(bot: Client, user: User) { return; }
+/*
+function recommendationHelper(bot: Client, user: User) {
+	return;
+}
+*/
 
 async function routeComponentInteraction(bot: Client, i: MessageComponentInteraction) {
 	if (i.isButton()) handleBtnPress(bot, i);
