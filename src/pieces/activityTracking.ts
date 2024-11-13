@@ -12,16 +12,18 @@ async function register(bot: Client): Promise<void> {
 	});
 
 	bot.on('guildMemberUpdate', async (old, updated) => {
-		const added = old.roles.cache.difference(updated.roles.cache);
-		if (added.size > 1) {
+		const added = updated.roles.cache.difference(old.roles.cache);
+		if (updated.roles.cache.size > old.roles.cache.size) {
 			added.forEach((role: Role) => {
-				trackRoles(old as GuildMember, 'remove', role).catch(async error => bot.emit('error', error));
+				if (old.roles.cache.has(role)) {
+					trackRoles(old as GuildMember, 'remove', role).catch(async error => bot.emit('error', error));
+				}
 			});
 		}
 	});
 	bot.on('guildMemberUpdate', async (old, updated) => {
-		const removed = updated.roles.cache.difference(old.roles.cache);
-		if (removed.size > 1) {
+		const removed = old.roles.cache.difference(updated.roles.cache);
+		if (removed.size > 0) {
 			removed.forEach((role: Role) => {
 				trackRoles(updated as GuildMember, 'add', role).catch(async error => bot.emit('error', error));
 			});
