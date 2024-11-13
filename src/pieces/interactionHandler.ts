@@ -19,26 +19,21 @@ async function register(bot: Client): Promise<void> {
 }
 
 async function recommendationService(bot: Client) {
-	console.log(`ENTER READY!`);
 	const channelId = CHANNELS.ANNOUNCEMENTS;
-	const guildID = bot.guilds.cache.get(GUILDS.MAIN);
-
 	const channel = bot.channels.cache.get(channelId);
-	// const users = bot.mongo.collection(DB.USERS);
-	console.log(bot.users.cache.map(user => `${user.username} ++ ${user.id}`));
-	const usersID = bot.users.cache.map(user => user.id);
+	const usersID = bot.users.cache.map(user => user);
 	for (let i = 0; i < usersID.length; i++) {
 		const userID = usersID[i];
-		const currentUser: SageUser = await bot.mongo.collection(DB.USERS).findOne({ discordId: usersID[i] });
-		console.log(userID);
-		if (userID === '296407382223749120') {
-			console.log(currentUser);
-			// (channel as TextChannel).send(`<@${userID}>`);
+		const currentUser = await bot.mongo.collection(DB.USERS).findOne({ discordId: userID.id });
+		if (currentUser !== null) {
+			console.log(currentUser.personalizeRec);
+			if (currentUser.personalizeRec !== undefined) {
+				bot.users.cache.get(currentUser.discordId).send(`<@${currentUser.discordId}>`);
+				(channel as TextChannel).send(`Sent DM to <@${currentUser.discordId}>`);
+			}
 		}
 	}
-	// eslint-disable-next-line no-extra-parens
-	// (channel as TextChannel).send('online');
-	// bot.login(BOT.TOKEN);
+	bot.login(BOT.TOKEN);
 }
 async function routeComponentInteraction(bot: Client, i: MessageComponentInteraction) {
 	if (i.isButton()) handleBtnPress(bot, i);
