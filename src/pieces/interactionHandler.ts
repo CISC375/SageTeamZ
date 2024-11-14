@@ -2,7 +2,7 @@ import { ButtonInteraction, Client, Message, MessageComponentInteraction, Messag
 import { handleRpsOptionSelect } from '../commands/fun/rockpaperscissors';
 import { handlePollOptionSelect } from '../commands/fun/poll';
 import { SageInteractionType } from '@lib/types/InteractionType';
-import { BOT, CHANNELS, DB } from '@root/config';
+import { BOT, CHANNELS, DB, GUILDS, ROLES } from '@root/config';
 import { SageUser } from '../lib/types/SageUser';
 
 const RECOMMENDATION_RESPONSES_ACTIVE = [
@@ -16,6 +16,7 @@ const RECOMMENDATION_RESPONSES_INACTIVE = [
 async function register(bot: Client): Promise<void> {
 	const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 	client.on('ready', () => { recommendationService(client); });
+	// recommendationService(client);
 	client.login(BOT.TOKEN);
 
 	bot.on('interactionCreate', i => {
@@ -30,10 +31,27 @@ async function recommendationService(bot: Client) {
 	console.log(`ENTER READY!`);
 	const channelId = CHANNELS.ANNOUNCEMENTS;
 
-	console.log('Retrieving Random User...');
-	const randomUser = await getRandomUser(bot);
-	console.log(`Retrieved User: ${randomUser.discordId}`);
-
+	try {
+		const guild = await bot.guilds.fetch(GUILDS.MAIN);
+		console.log(`Guild fetched: ${guild.name}`);
+		const members = await guild.members.fetch();
+		guild.members.cache.forEach(async (member) => {
+			if (member.user.bot || !member.roles.cache.has(ROLES.VERIFIED)) {
+				try {
+					const currentUser = await bot.mongo.collection<SageUser>(DB.USERS).findOne({ discordId: member.user.id });
+					if (currentUser) {
+						console.log(`User found: ${currentUser.email}`);
+					} else {
+						console.log(`No user found for member: ${member.user.tag}`);
+					}
+				} catch (error) {
+					console.log(`Error fetching user from MongoDB: ${error}`);
+				}
+			}
+		});
+	} catch (error) {
+		console.error(`Error in recommendationService: ${error}`);
+	}
 	console.log('Working on User recommendation...');
 	// recommendationHelper(bot, user);
 
@@ -42,21 +60,9 @@ async function recommendationService(bot: Client) {
 	// (channel as TextChannel).send('online');
 }
 
-async function getRandomUser(bot: Client): Promise<SageUser | null> {
-	try {
-		const randomUser = await bot.mongo.collection(DB.USERS).aggregate([{ $sample: { size: 1 } }]).toArray();
-		return randomUser[0];
-	} catch (error) {
-		console.error('Error getting random user:', error);
-		return null;
-	}
-}
-
-/*
 function recommendationHelper(bot: Client, user: User) {
-	return;
+	return null;
 }
-*/
 
 async function routeComponentInteraction(bot: Client, i: MessageComponentInteraction) {
 	if (i.isButton()) handleBtnPress(bot, i);
