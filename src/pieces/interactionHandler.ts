@@ -8,7 +8,6 @@ import { SageUser } from '../lib/types/SageUser';
 async function register(bot: Client): Promise<void> {
 	bot.on('interactionCreate', i => {
 		if (i.isMessageComponent()) routeComponentInteraction(bot, i);
-		if (i.isModalSubmit()) routeModalInteraction(bot, i);
 	});
 	// When creating a message this portion will run because it see's that message Reactions have been added and will trigger on the initial add of thumbs up and down
 	// need an if statement to verify the interaction just how the one above says i.isMessageComponent it could be the same but try different options
@@ -20,13 +19,13 @@ async function routeComponentInteraction(bot: Client, i: MessageComponentInterac
 }
 
 // test modal input area
-async function routeModalInteraction(bot: Client, i: ModalSubmitInteraction) {
+/* async function routeModalInteraction(bot: Client, i: ModalSubmitInteraction) {
 	console.log('enter modal ', i.customId, '   ', i.user.id);
-	if (i.customId === 'recModal') {
+	/*if (i.customId === 'recModal') {
 		const toneSet = i.fields.getTextInputValue('tone');
 		await i.reply({ content: `Your favorite color is: ${toneSet}`, ephemeral: false });
-	}
-}
+	}*/
+// }
 // ////////////////////////////////////////
 
 export default register;

@@ -105,6 +105,8 @@ async function handleDropdown(interaction: SelectMenuInteraction) {
 
 async function handleModalBuilder(interaction: ModalSubmitInteraction, bot: Client) {
 	const { customId, fields } = interaction;
+	const userID = interaction.user.id;
+	console.log(userID);
 	const guild = await bot.guilds.fetch(GUILDS.MAIN);
 	guild.members.fetch();
 
@@ -122,10 +124,12 @@ async function handleModalBuilder(interaction: ModalSubmitInteraction, bot: Clie
 			break;
 		}
 		case 'edit': {
+			console.log('entered edit');
 			const content = fields.getTextInputValue('content');
 			const channel = bot.channels.cache.get(fields.getTextInputValue('channel')) as TextChannel;
 			const message = await channel.messages.fetch(fields.getTextInputValue('message'));
 			await message.edit(content);
+			console.log('entered edit');
 			interaction.reply({ content: `Your message was edited.` });
 			break;
 		}
@@ -143,6 +147,31 @@ async function handleModalBuilder(interaction: ModalSubmitInteraction, bot: Clie
 			` go to <#${CHANNELS.ROLE_SELECT}> and use the proper dropdown menu.`
 				: '';
 			interaction.reply({ content: `Thank you for verifying! You can now access the rest of the server. ${enrollStr}`, ephemeral: true });
+			break;
+		}
+		// here is where the submit button on the modal updates to Mongo
+		case 'recommendationchanges': {
+			const entry: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: userID });
+			const userObj = entry.personalizeRec;
+			const reccType = fields.getTextInputValue('reccType');
+			const frequency = fields.getTextInputValue('frequency');
+			const tone = fields.getTextInputValue('tone');
+			const scheduled = fields.getTextInputValue('scheduled');
+			if (reccType !== '') {
+				userObj.reccType = reccType;
+			}
+			if (frequency !== '') {
+				userObj.frequency = frequency;
+			}
+			if (tone !== '') {
+				userObj.tone = tone;
+			}
+			if (scheduled !== '') {
+				userObj.scheduled = scheduled;
+			}
+			console.log('MODAL COMMANDMANAGER');
+			interaction.reply({ content: `${userObj.reccType} -- ${userObj.frequency} -- ${userObj.tone} -- ${userObj.scheduled}` });
+			interaction.client.mongo.collection(DB.USERS).findOneAndUpdate({ discordId: userID }, { $set: { personalizeRec: userObj } });
 			break;
 		}
 	}
@@ -257,7 +286,7 @@ export async function loadCommands(bot: Client): Promise<void> {
 
 async function runCommand(interaction: ChatInputCommandInteraction, bot: Client): Promise<unknown> {
 	const command = bot.commands.get(interaction.commandName);
-
+	console.log('test::: ', command);
 	if (interaction.channel.type === ChannelType.GuildText && command.runInGuild === false) {
 		return interaction.reply({
 			content: 'This command must be run in DMs, not public channels',
@@ -289,7 +318,6 @@ async function runCommand(interaction: ChatInputCommandInteraction, bot: Client)
 		try {
 			// COMMAND USAGE MAKE SURE ITS A VALID POSITION AND WILL RETURN -1 IF NOT FOUND IN THE ARRAY OF OBJECTS
 			const returnCU = await bot.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
-			console.log(returnCU.commandUsage);
 			const arrayCU = returnCU.commandUsage;
 			const item = arrayCU.findIndex(i => i.commandName === command.name);
 			console.log(item);
