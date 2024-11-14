@@ -121,7 +121,7 @@ async function main() {
 			personalizeRec: {
 				usertype: 'active',
 				mostusedCommand: '',
-				reccType: 'announcements',
+				reccType: 'DM',
 				frequency: 'aggressive',
 				tone: 'formal',
 				scheduled: 'random'

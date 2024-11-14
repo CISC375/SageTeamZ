@@ -1,23 +1,13 @@
-import { ButtonInteraction, Client, Message, MessageComponentInteraction, MessageReaction, TextChannel, User, GatewayIntentBits } from 'discord.js';
+import { ButtonInteraction, Client, Message, MessageComponentInteraction, MessageReaction, TextChannel, User, GatewayIntentBits, Collection } from 'discord.js';
 import { handleRpsOptionSelect } from '../commands/fun/rockpaperscissors';
 import { handlePollOptionSelect } from '../commands/fun/poll';
 import { SageInteractionType } from '@lib/types/InteractionType';
 import { BOT, CHANNELS, DB, GUILDS, ROLES } from '@root/config';
 import { SageUser } from '../lib/types/SageUser';
 
-const RECOMMENDATION_RESPONSES_ACTIVE = [
-	' '
-];
-
-const RECOMMENDATION_RESPONSES_INACTIVE = [
-	''
-];
-
 async function register(bot: Client): Promise<void> {
 	const client = new Client({ intents: [GatewayIntentBits.Guilds] });
-	client.on('ready', () => { recommendationService(client); });
-	// recommendationService(client);
-	client.login(BOT.TOKEN);
+	client.on('ready', (i) => { recommendationService(bot); });
 
 	bot.on('interactionCreate', i => {
 		if (i.isMessageComponent()) routeComponentInteraction(bot, i);
@@ -25,39 +15,25 @@ async function register(bot: Client): Promise<void> {
 	// When creating a message this portion will run because it see's that message Reactions have been added and will trigger on the initial add of thumbs up and down
 	// need an if statement to verify the interaction just how the one above says i.isMessageComponent it could be the same but try different options
 	bot.on('messageReactionAdd', (reaction, user) => handleUserReaction(bot, reaction.message.embeds[0].description, reaction.emoji.name, user.id));
+	client.login(BOT.TOKEN);
 }
 
 async function recommendationService(bot: Client) {
-	console.log(`ENTER READY!`);
 	const channelId = CHANNELS.ANNOUNCEMENTS;
-
-	try {
-		const guild = await bot.guilds.fetch(GUILDS.MAIN);
-		console.log(`Guild fetched: ${guild.name}`);
-		const members = await guild.members.fetch();
-		guild.members.cache.forEach(async (member) => {
-			if (member.user.bot || !member.roles.cache.has(ROLES.VERIFIED)) {
-				try {
-					const currentUser = await bot.mongo.collection<SageUser>(DB.USERS).findOne({ discordId: member.user.id });
-					if (currentUser) {
-						console.log(`User found: ${currentUser.email}`);
-					} else {
-						console.log(`No user found for member: ${member.user.tag}`);
-					}
-				} catch (error) {
-					console.log(`Error fetching user from MongoDB: ${error}`);
-				}
-			}
-		});
-	} catch (error) {
-		console.error(`Error in recommendationService: ${error}`);
-	}
-	console.log('Working on User recommendation...');
-	// recommendationHelper(bot, user);
-
 	const channel = bot.channels.cache.get(channelId);
-	// eslint-disable-next-line no-extra-parens
-	// (channel as TextChannel).send('online');
+	const usersID = bot.users.cache.map(user => user);
+	for (let i = 0; i < usersID.length; i++) {
+		const userID = usersID[i];
+		const currentUser = await bot.mongo.collection(DB.USERS).findOne({ discordId: userID.id });
+		if (currentUser !== null) {
+			console.log(currentUser.personalizeRec);
+			if (currentUser.personalizeRec !== undefined) {
+				/// bot.users.cache.get(currentUser.discordId).send(`<@${currentUser.discordId}>`);
+				// (channel as TextChannel).send(`Sent DM to <@${currentUser.discordId}>`);
+			}
+		}
+	}
+	bot.login(BOT.TOKEN);
 }
 
 function recommendationHelper(bot: Client, user: User) {

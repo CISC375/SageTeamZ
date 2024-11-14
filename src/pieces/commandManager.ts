@@ -312,6 +312,28 @@ async function runCommand(interaction: ChatInputCommandInteraction, bot: Client)
 			}
 			// console.log(interaction.user.id, '   ', bot.user.id);
 			// ////////////////////////////////////////////////////////////////////////////////
+			const randNum = Math.floor(Math.random() * (20 - 1 + 1)) + 1;
+			if (randNum > 18) {
+				const user_ = await bot.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
+				if (user_.personalizeRec.reccType === 'DM') {
+					console.log('reached here - DM');
+					// eslint-disable-next-line max-depth
+					try {
+						await interaction.user.send(`Howdy!`);
+					} catch (error) {
+						console.error('Failed to send DM:', error);
+					}
+				} else {
+					console.log('reached here - reply');
+					// eslint-disable-next-line max-depth
+					try {
+						// eslint-disable-next-line max-depth
+						await interaction.followUp({ content: `Following Up`, ephemeral: false });
+					} catch (error) {
+						console.error('Failed to send reply or follow-up:', error);
+					}
+				}
+			}
 			bot.commands.get(interaction.commandName).run(interaction)
 				?.catch(async (error: Error) => { // Idk if this is needed now, but keeping in case removing it breaks stuff...
 					bot.emit('error', new CommandError(error, interaction));
