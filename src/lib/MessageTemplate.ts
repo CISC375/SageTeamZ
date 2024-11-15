@@ -1,8 +1,6 @@
-export function messageTemplate(schedule: string,recommended: string[], userData: string[], type: 'casual' | 'formal'): string {
+export function messageTemplate(schedule: string, type: string, recommended: string[], userData: string[]): string {
 	const userActivities = userData.reduce((newString: string, str: string): string => newString + str, '');
-	const reccomendations = userData
-		.map((str:string) => `- ${str}\n\t`)
-		.reduce((newString: string, str: string): string => newString + str, '');
+	const reccomendations = recommended.reduce((newString: string, str: string): string => newString + str, '');
 
 	let message;
 
