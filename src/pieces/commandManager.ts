@@ -1,3 +1,4 @@
+/* eslint-disable max-depth */
 import { Collection, Client, CommandInteraction, ApplicationCommand,
 	GuildMember, SelectMenuInteraction,
 	ModalSubmitInteraction, TextChannel, GuildMemberRoleManager,
@@ -12,6 +13,7 @@ import { Course } from '../lib/types/Course';
 import { SageUser } from '../lib/types/SageUser';
 import { CommandError } from '../lib/types/errors';
 import { verify } from '../pieces/verification';
+import { FUN_RECS, ADMIN_RECS, CONFIG_RECS, REMIND_RECS, INFO_RECS, PARTIALVIS_RECS, QUESTIONTAG_RECS, recommendationHelper, getMostUsed, logicRec } from '../lib/types/commands';
 
 const DELETE_DELAY = 10000;
 
@@ -256,6 +258,7 @@ export async function loadCommands(bot: Client): Promise<void> {
 	console.log(`${bot.commands.size} commands loaded (${numNew} new, ${numEdited} edited).`);
 }
 
+// eslint-disable-next-line complexity
 async function runCommand(interaction: ChatInputCommandInteraction, bot: Client): Promise<unknown> {
 	console.log('-----------------');
 	const command = bot.commands.get(interaction.commandName);
@@ -316,36 +319,24 @@ async function runCommand(interaction: ChatInputCommandInteraction, bot: Client)
 					{ $push: { commandUsage: commandUsageObject } });
 			}
 			// console.log(interaction.user.id, '   ', bot.user.id);
-			const randNum = Math.floor(Math.random() * (20 - 1 + 1)) + 1; // The math to make it random (Between 1 and 20)
-			if (randNum > 18) {
-				const user_ = await bot.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
-				if (user_.personalizeRec.reccType === 'DM') { // Sends User a DM (Not currently recommendations, just a lil Howdy)
-					console.log('reached here - DM');
-					// eslint-disable-next-line max-depth
-					try {
-						await interaction.user.send(`Howdy!`);
-					} catch (error) {
-						console.error('Failed to send DM:', error);
-					}
-				} else { // Does a followUp if the User has their reccType set to anything else
-					console.log('reached here - reply');
-					// eslint-disable-next-line max-depth
-					try {
-						// Does not currently display as ephemeral due to the the bot doing a followUp to its own reply
-						await interaction.followUp({ content: `Following Up`, ephemeral: false });
-					} catch (error) {
-						console.error('Failed to send reply or follow-up:', error);
-					}
-				}
+			//
+			//
+			//
+			const user_ = await bot.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
+			if (user_.personalizeRec.reccType !== 'None') {
+				logicRec(user_, interaction, bot);
 			}
+			//
+			//
+			//
 			bot.commands.get(interaction.commandName).run(interaction)
 				?.catch(async (error: Error) => { // Idk if this is needed now, but keeping in case removing it breaks stuff...
 					bot.emit('error', new CommandError(error, interaction));
 					interaction.reply({ content: `An error occurred. ${MAINTAINERS} have been notified.`, ephemeral: true });
 				});
-			if (currentUser.personalizeRec.reccType === 'DM') {
+			/* if (currentUser.personalizeRec.reccType === 'DM') {
 				bot.users.cache.get(currentUser.discordId).send(`<@${currentUser.discordId}>`);
-			}
+			}*/
 		} catch (error) {
 			bot.emit('error', new CommandError(error, interaction));
 			interaction.reply({ content: `An error occurred. ${MAINTAINERS} have been notified.`, ephemeral: true });
