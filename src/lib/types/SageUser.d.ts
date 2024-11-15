@@ -15,10 +15,18 @@ export interface SageUser {
 	activityLevel: string;
 	isNewUser: boolean;
 	messageCount: number
-	commandUsage: Array<Record<string, number>>;
+	commandUsage: Array<{ commandName: string; commandCount: number; commandType: string }>;
 	responseTime: number;
 	lastMessage: number;
 	timestampArray: Array<Array<Record<string, number>>>;
 	activityLog: Array<Record<string, unknown>>;
 	feedbackLog: Array<Record<string, unknown>>;
+	personalizeRec: {
+        usertype: 'active' | 'inactive' | 'new';  
+        mostusedCommand: string | null;           
+        reccType: 'announcements' | 'reminders' | 'offers'; 
+        frequency: 'aggressive' | 'moderate' | 'low';       
+        tone: 'formal' | 'casual';              
+        scheduled: 'random' | 'daily' | 'weekly'; 
+    };
 }
