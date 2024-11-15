@@ -1,4 +1,4 @@
-import { Client, Embed, EmbedBuilder, GuildMember, PartialGuildMember } from 'discord.js';
+import { Client, EmbedBuilder, GuildMember, PartialGuildMember } from 'discord.js';
 import { SageUser } from '@lib/types/SageUser';
 import { DatabaseError } from '@lib/types/errors';
 import { DB, FIRST_LEVEL, GUILDS, ROLES } from '@root/config';
@@ -35,7 +35,8 @@ async function memberAdd(member: GuildMember): Promise<void> {
 		{
 			name: 'Sage Command Reccomendations',
 			value: `Sage will suggest commands implemented based on your activities in the server ranging from activity or inactivity, messages, and command usage. 
-					You are able to change this using \`/reccomendationchanges \` in any channel`
+					You are able to change this using \`/reccomendationchanges \` in any channel\n
+					This is enabled by default, to turn it off use \`/togglerecommendation off\` or use \`/reccomendationchanges \``
 		}
 	);
 
