@@ -190,6 +190,7 @@ export async function loadCommands(bot: Client): Promise<void> {
 		const commandModule = await import(file);
 
 		const dirs = file.split('/');
+
 		const name = dirs[dirs.length - 1].split('.')[0];
 
 		// semi type-guard, typeof returns function for classes
@@ -258,6 +259,7 @@ export async function loadCommands(bot: Client): Promise<void> {
 async function runCommand(interaction: ChatInputCommandInteraction, bot: Client): Promise<unknown> {
 	console.log('-----------------');
 	const command = bot.commands.get(interaction.commandName);
+	console.log(command.category);
 	const currentUser = await bot.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
 	if (interaction.channel.type === ChannelType.GuildText && command.runInGuild === false) {
 		return interaction.reply({
@@ -306,7 +308,8 @@ async function runCommand(interaction: ChatInputCommandInteraction, bot: Client)
 				const commandUsageObject = {
 					commandName: command.name,
 					commandDescription: command.description,
-					commandCount: 1
+					commandCount: 1,
+					commandCategory: command.category
 				};
 				bot.mongo.collection(DB.USERS).findOneAndUpdate(
 					{ discordId: interaction.user.id },

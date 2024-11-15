@@ -14,7 +14,7 @@ export const FUN_RECS = [
 	'submit',
 	'thisisfine',
 	'xkcd'
-]
+];
 
 export const ADMIN_RECS = [
 	'activity',
@@ -34,18 +34,18 @@ export const ADMIN_RECS = [
 	'setassign',
 	'showcommands',
 	'status'
-]
+];
 
 export const CONFIG_RECS = [
 	'togglelevelpings',
 	'togglepii'
-]
+];
 
 export const REMIND_RECS = [
 	'cancelreminder',
 	'remind',
 	'viewreminders'
-]
+];
 
 export const INFO_RECS = [
 	'commit',
@@ -59,16 +59,16 @@ export const INFO_RECS = [
 	'serverinfo',
 	'statreport',
 	'stats'
-]
+];
 
 export const PARTIALVIS_RECS = [
 	'anonymous',
 	'archive',
 	'private',
 	'reply'
-]
+];
 
 export const QUESTIONTAG_RECS = [
 	'question',
 	'tagquestion'
-]
+];
