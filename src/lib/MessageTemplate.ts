@@ -10,9 +10,7 @@ export function messageTemplate(schedule: string,recommended: string[], userData
 		message = `Hello, here is your ${schedule} recommendations list.\n 
 			Based on your recent activities: ${userActivities}\n
 			We would like you to try using:\n\t${reccomendations}`;
-	}
-	else{
-		//TODO
+	} else {
 		message = `Yo, here is your ${schedule} recommendations list.\n 
 			Based on your recent activities: ${userActivities}\n
 			Here are some cool commands we think you will enjoy:\n\t${reccomendations}`;
