@@ -311,11 +311,10 @@ async function runCommand(interaction: ChatInputCommandInteraction, bot: Client)
 					{ $push: { commandUsage: commandUsageObject } });
 			}
 			// console.log(interaction.user.id, '   ', bot.user.id);
-			// ////////////////////////////////////////////////////////////////////////////////
-			const randNum = Math.floor(Math.random() * (20 - 1 + 1)) + 1;
+			const randNum = Math.floor(Math.random() * (20 - 1 + 1)) + 1; // The math to make it random (Between 1 and 20)
 			if (randNum > 18) {
 				const user_ = await bot.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
-				if (user_.personalizeRec.reccType === 'DM') {
+				if (user_.personalizeRec.reccType === 'DM') { // Sends User a DM (Not currently recommendations, just a lil Howdy)
 					console.log('reached here - DM');
 					// eslint-disable-next-line max-depth
 					try {
@@ -323,11 +322,11 @@ async function runCommand(interaction: ChatInputCommandInteraction, bot: Client)
 					} catch (error) {
 						console.error('Failed to send DM:', error);
 					}
-				} else {
+				} else { // Does a followUp if the User has their reccType set to anything else
 					console.log('reached here - reply');
 					// eslint-disable-next-line max-depth
 					try {
-						// eslint-disable-next-line max-depth
+						// Does not currently display as ephemeral due to the the bot doing a followUp to its own reply
 						await interaction.followUp({ content: `Following Up`, ephemeral: false });
 					} catch (error) {
 						console.error('Failed to send reply or follow-up:', error);
