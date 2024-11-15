@@ -22,11 +22,21 @@ async function memberAdd(member: GuildMember): Promise<void> {
 
 	const embed = new EmbedBuilder()
 		.setTitle(`Welcome to the ${member.guild.name} Discord Server`)
-		.setDescription(`Hey, ${member.displayName}, take a look at this link`)
+		.setDescription(
+			`Check out the links for more details on our server\n
+			We reccommend reading the server rules: [Rules]](https://ud-cis-discord.github.io/#rules)`
+		)
 		.setTimestamp();
 
 	embed.addFields(
-		{ name: 'To Get Started', value: 'https://ud-cis-discord.github.io/getting_started/' }
+		{
+			name: 'To Get Started', value: 'Please visit https://ud-cis-discord.github.io/getting_started/'
+		},
+		{
+			name: 'Sage Command Reccomendations',
+			value: `Sage will suggest commands implemented based on your activities in the server ranging from activity or inactivity, messages, and command usage. 
+					You are able to change this using \`/reccomendationchanges \` in any channel`
+		}
 	);
 
 	member.send({ embeds: [embed] });
