@@ -178,6 +178,7 @@ export function getRandomUnusedCommand(categorycommands: any[], usedCommands: an
 	return unusedCommands[Math.floor(Math.random() * unusedCommands.length)];
 }
 
+// Logic Rec makes sure that the logic is correct and sends the correct information
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export async function logicRec(user_ : SageUser, interaction : ChatInputCommandInteraction, bot: Client) {
 	let randNum = 19; // Math.floor(Math.random() * (20 - 1 + 1)) + 1; // The math to make it random (Between 1 and 20)

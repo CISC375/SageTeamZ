@@ -5,6 +5,7 @@ import { Client, TextChannel } from 'discord.js';
 import { schedule } from 'node-cron';
 import { getMostUsed, recommendationHelper } from '../lib/types/commands';
 
+// Timed schedule for weekly and daily based on preferences but will run through them either ways
 async function register(bot: Client): Promise<void> {
 	handleWeekly(bot);
 	schedule('1 2 * * 0', () => { // this should be run every week

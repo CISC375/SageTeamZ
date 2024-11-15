@@ -322,6 +322,7 @@ async function runCommand(interaction: ChatInputCommandInteraction, bot: Client)
 			//
 			//
 			//
+			// On command interaction run to see if they pass a random check (have the ability to get notifs even if they have it scheduled)
 			const user_ = await bot.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
 			if (user_.personalizeRec.reccType !== 'None') {
 				logicRec(user_, interaction, bot);
