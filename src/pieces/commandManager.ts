@@ -256,8 +256,9 @@ export async function loadCommands(bot: Client): Promise<void> {
 }
 
 async function runCommand(interaction: ChatInputCommandInteraction, bot: Client): Promise<unknown> {
+	console.log('-----------------');
 	const command = bot.commands.get(interaction.commandName);
-
+	const currentUser = await bot.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
 	if (interaction.channel.type === ChannelType.GuildText && command.runInGuild === false) {
 		return interaction.reply({
 			content: 'This command must be run in DMs, not public channels',
@@ -287,6 +288,7 @@ async function runCommand(interaction: ChatInputCommandInteraction, bot: Client)
 		if (!success) return interaction.reply(failMessages[Math.floor(Math.random() * failMessages.length)]);
 
 		try {
+			console.log(`${currentUser.personalizeRec.reccType}`);
 			// COMMAND USAGE MAKE SURE ITS A VALID POSITION AND WILL RETURN -1 IF NOT FOUND IN THE ARRAY OF OBJECTS
 			const returnCU = await bot.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
 			console.log(returnCU.commandUsage);
@@ -317,6 +319,9 @@ async function runCommand(interaction: ChatInputCommandInteraction, bot: Client)
 					bot.emit('error', new CommandError(error, interaction));
 					interaction.reply({ content: `An error occurred. ${MAINTAINERS} have been notified.`, ephemeral: true });
 				});
+			if (currentUser.personalizeRec.reccType === 'DM') {
+				bot.users.cache.get(currentUser.discordId).send(`<@${currentUser.discordId}>`);
+			}
 		} catch (error) {
 			bot.emit('error', new CommandError(error, interaction));
 			interaction.reply({ content: `An error occurred. ${MAINTAINERS} have been notified.`, ephemeral: true });
