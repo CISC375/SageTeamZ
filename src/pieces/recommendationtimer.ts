@@ -8,6 +8,8 @@ import { getMostUsed, recommendationHelper } from '../lib/types/commands';
 // Timed schedule for weekly and daily based on preferences but will run through them either ways
 async function register(bot: Client): Promise<void> {
 	handleWeekly(bot);
+	handleDaily(bot);
+	handleWeeklyWipe(bot);
 	schedule('1 2 * * 0', () => { // this should be run every week
 		handleWeekly(bot)
 			.catch(async error => bot.emit('error', error));
@@ -16,6 +18,28 @@ async function register(bot: Client): Promise<void> {
 		handleDaily(bot)
 			.catch(async error => bot.emit('error', error));
 	});
+	schedule('0 3 * * *', () => { // run every day at 3:00am
+		handleWeeklyWipe(bot)
+			.catch(async error => bot.emit('error', error));
+	});
+}
+
+async function handleWeeklyWipe(bot: Client) {
+	const usersID = bot.users.cache.map(user => user);
+	for (let i = 0; i < usersID.length; i++) {
+		const userID = usersID[i];
+		const currentUser = await bot.mongo.collection(DB.USERS).findOne({ discordId: userID.id });
+		
+		if (currentUser !== null) {
+			const objectUser = currentUser.personalizeRec;
+			if (objectUser !== undefined) {
+				objectUser.recommendedCommands = []
+				await bot.mongo.collection(DB.USERS).updateOne(
+					{ discordId: currentUser.id },
+					{ $set: { personalizeRec: objectUser } });
+			}
+		}
+	}
 }
 
 async function handleWeekly(bot: Client) {

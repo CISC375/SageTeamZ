@@ -107,7 +107,11 @@ async function main() {
 			activityLevel: 'active',
 			isNewUser: true,
 			messageCount: 0,
-			commandUsage: [],
+			commandUsage: [{
+				commandName: '',
+				commandCount: 0,
+				commandType: ''
+			}],
 			responseTime: -1,
 			lastMessage: -1,
 			timestampArray: [],
@@ -121,10 +125,11 @@ async function main() {
 			personalizeRec: {
 				usertype: 'active',
 				mostusedCommand: '',
-				reccType: 'DM',
+				reccType: 'announcements',
 				frequency: 'aggressive',
 				tone: 'formal',
-				scheduled: 'random'
+				scheduled: 'random',
+				recommendedCommands: []
 			}
 		};
 		// ADDED MORE TO ACTIVITYLOG, TIMESTAMPARRAY, AND COMMANDUSAGE THEY ARE EXAMPLES OF HOW TO STORE (SET AS DEFAULTS RN)

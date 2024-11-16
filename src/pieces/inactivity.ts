@@ -21,7 +21,7 @@ async function handleInactivity(bot: Client) {
 		if (member.user.bot || !member.roles.cache.has(ROLES.VERIFIED)) return; // ignore bots/unverified members
 		const currentUser = await bot.mongo.collection<SageUser>(DB.USERS).findOne({ discordId: member.user.id });
 		if (!currentUser) return; // not in database (for some reason; maybe ID is not linked to a user document)
-
+		
 		if (currentUser.isNewUser) {
 			if (currentUser.messageCount < 1 && currentUser.activityLevel === 'active') {
 				const roleToGive = member.guild.roles.cache.get('1302773007554449518');
@@ -68,6 +68,7 @@ async function handleInactivity(bot: Client) {
 		}
 		// After updating activity level for this week, wipe the message count
 		currentUser.messageCount = 0;
+		
 	});
 }
 export default register;

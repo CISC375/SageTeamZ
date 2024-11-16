@@ -77,6 +77,25 @@ export const QUESTIONTAG_RECS = [
 	'tagquestion'
 ];
 
+const FUN_COMMAND_STRINGS = [
+	"I think you might enjoy trying \"{command}\"!",
+	"Here’s something fun: \"{command}\".",
+	"Feeling adventurous? \"{command}\" could be entertaining!",
+	"\"{command}\" is a great pick for a bit of fun.",
+	"You’re going to love \"{command}\". Give it a shot!",
+	"Take a look at \"{command}\"—perfect for some excitement.",
+  ];
+  
+  const NORMAL_COMMAND_STRINGS = [
+	"I think \"{command}\" might be helpful for you.",
+	"Here’s something useful: \"{command}\".",
+	"\"{command}\" could be a good option to explore.",
+	"Consider checking out \"{command}\"—it’s worth your time.",
+	"\"{command}\" is a practical choice to consider.",
+	"This could be a helpful next step: \"{command}\"."
+  ];
+  
+
 
 export async function recommendationService(bot: Client) {
 	const channelId = CHANNELS.ANNOUNCEMENTS;
@@ -119,6 +138,7 @@ export async function getMostUsed(bot: Client, user: SageUser) {
 	}
 	return `${mostUsed}.${mostUsedType}`;
 }
+
 export async function recommendationHelper(bot: Client, user: SageUser) {
 	// const x = bot.commands.get(mostUsed).type
 	// console.log(x);
@@ -127,13 +147,17 @@ export async function recommendationHelper(bot: Client, user: SageUser) {
 	const spliced = (await getMostUsed(bot, user)).split('.');
 	// eslint-disable-next-line prefer-destructuring
 	objectUser.mostusedCommand = spliced[0];
-	bot.mongo.collection(DB.USERS).findOneAndUpdate({ discordId: user }, { $set: { personalizeRec: objectUser } });
-
 	const randomunusedCommand = recommendUnusedCommand(spliced[1], user);
+	objectUser.recommendedCommands.push(randomunusedCommand);
+	bot.mongo.collection(DB.USERS).findOneAndUpdate({ discordId: user }, { $set: { personalizeRec: objectUser } });
+	
 	// makes sure user has a slot for most used and the type since originally it was null
 	if (randomunusedCommand !== null) {
-		return `Hey, check this command out: ${randomunusedCommand}`;
+		const messages = objectUser.tone === 'casual' ? FUN_COMMAND_STRINGS : NORMAL_COMMAND_STRINGS;
+		const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+		return randomMessage.replace('{command}', randomunusedCommand);			
 	}
+
 }
 
 /* Retrieve commands of the same type of the most used command */
