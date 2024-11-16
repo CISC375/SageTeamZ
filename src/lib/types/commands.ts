@@ -148,7 +148,10 @@ export async function recommendationHelper(bot: Client, user: SageUser) {
 	// eslint-disable-next-line prefer-destructuring
 	objectUser.mostusedCommand = spliced[0];
 	const randomunusedCommand = recommendUnusedCommand(spliced[1], user);
-	objectUser.recommendedCommands.push(randomunusedCommand);
+	if (!objectUser.recommendedCommands) {
+		objectUser.recommendedCommands = []; 
+	  }
+	  objectUser.recommendedCommands.push(randomunusedCommand);
 	bot.mongo.collection(DB.USERS).findOneAndUpdate({ discordId: user }, { $set: { personalizeRec: objectUser } });
 	
 	// makes sure user has a slot for most used and the type since originally it was null
