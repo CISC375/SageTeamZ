@@ -1,3 +1,4 @@
+/* eslint-disable quotes */
 import { BOT, CHANNELS, DB } from '@root/config';
 import { ChatInputCommandInteraction, Client, TextChannel, User } from 'discord.js';
 import { SageUser } from './SageUser';
@@ -83,18 +84,17 @@ const FUN_COMMAND_STRINGS = [
 	"Feeling adventurous? \"{command}\" could be entertaining!",
 	"\"{command}\" is a great pick for a bit of fun.",
 	"You’re going to love \"{command}\". Give it a shot!",
-	"Take a look at \"{command}\"—perfect for some excitement.",
-  ];
-  
-  const NORMAL_COMMAND_STRINGS = [
+	"Take a look at \"{command}\"—perfect for some excitement."
+];
+
+const NORMAL_COMMAND_STRINGS = [
 	"I think \"{command}\" might be helpful for you.",
 	"Here’s something useful: \"{command}\".",
 	"\"{command}\" could be a good option to explore.",
 	"Consider checking out \"{command}\"—it’s worth your time.",
 	"\"{command}\" is a practical choice to consider.",
 	"This could be a helpful next step: \"{command}\"."
-  ];
-  
+];
 
 
 export async function recommendationService(bot: Client) {
@@ -149,18 +149,16 @@ export async function recommendationHelper(bot: Client, user: SageUser) {
 	objectUser.mostusedCommand = spliced[0];
 	const randomunusedCommand = recommendUnusedCommand(spliced[1], user);
 	if (!objectUser.recommendedCommands) {
-		objectUser.recommendedCommands = []; 
-	  }
-	  objectUser.recommendedCommands.push(randomunusedCommand);
+		objectUser.recommendedCommands = [];
+	}
+	objectUser.recommendedCommands.push(randomunusedCommand);
 	bot.mongo.collection(DB.USERS).findOneAndUpdate({ discordId: user }, { $set: { personalizeRec: objectUser } });
-	
 	// makes sure user has a slot for most used and the type since originally it was null
 	if (randomunusedCommand !== null) {
 		const messages = objectUser.tone === 'casual' ? FUN_COMMAND_STRINGS : NORMAL_COMMAND_STRINGS;
 		const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-		return randomMessage.replace('{command}', randomunusedCommand);			
+		return randomMessage.replace('{command}', randomunusedCommand);
 	}
-
 }
 
 /* Retrieve commands of the same type of the most used command */
