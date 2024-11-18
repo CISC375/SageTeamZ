@@ -77,6 +77,25 @@ export const QUESTIONTAG_RECS = [
 	'tagquestion'
 ];
 
+export const REMINDERS = [
+	'cancelreminder',
+	'remind',
+	'viewreminders'
+];
+
+export const STAFF = [
+	'addassignment',
+	'blockpy',
+	'google',
+	'lookup',
+	'mute',
+	'resetlevel',
+	'roleinfo',
+	'sudoreply',
+	'warn',
+	'whois'
+]
+
 const FUN_COMMAND_STRINGS = [
 	"I think you might enjoy trying \"{command}\"!",
 	"Here’s something fun: \"{command}\".",
@@ -151,7 +170,7 @@ export async function recommendationHelper(bot: Client, user: SageUser) {
 	if (!objectUser.recommendedCommands) {
 		objectUser.recommendedCommands = []; 
 	  }
-	  objectUser.recommendedCommands.push(randomunusedCommand);
+	objectUser.recommendedCommands.push(randomunusedCommand);
 	bot.mongo.collection(DB.USERS).findOneAndUpdate({ discordId: user }, { $set: { personalizeRec: objectUser } });
 	
 	// makes sure user has a slot for most used and the type since originally it was null
@@ -188,8 +207,15 @@ export function recommendUnusedCommand(mostUsedType: string, user: { commandUsag
 			randomUnusedCommand = getRandomUnusedCommand(PARTIALVIS_RECS, user.commandUsage, mostUsedType);
 			break;
 		case 'questiontagging':
-			randomUnusedCommand = getRandomUnusedCommand(PARTIALVIS_RECS, user.commandUsage, mostUsedType);
+			randomUnusedCommand = getRandomUnusedCommand(QUESTIONTAG_RECS, user.commandUsage, mostUsedType);
 			break;
+		case 'reminders':
+			randomUnusedCommand = getRandomUnusedCommand(REMINDERS, user.commandUsage, mostUsedType);
+			break;
+		case 'staff':
+			randomUnusedCommand = getRandomUnusedCommand(STAFF, user.commandUsage, mostUsedType);
+			break;
+
 	}
 
 	return randomUnusedCommand;
