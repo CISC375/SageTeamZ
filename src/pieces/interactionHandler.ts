@@ -1,4 +1,5 @@
-import { ButtonInteraction, Client, Message, MessageComponentInteraction, MessageReaction, TextChannel, User, GatewayIntentBits, Collection, ApplicationCommandType } from 'discord.js';
+// eslint-disable-next-line max-len
+import { ButtonInteraction, Client, Message, MessageComponentInteraction, MessageReaction, ModalActionRowComponent, ModalSubmitComponent, ModalSubmitInteraction, TextChannel, User, GatewayIntentBits, Collection, ApplicationCommandType } from 'discord.js';
 import { handleRpsOptionSelect } from '../commands/fun/rockpaperscissors';
 import { handlePollOptionSelect } from '../commands/fun/poll';
 import { SageInteractionType } from '@lib/types/InteractionType';
@@ -121,6 +122,16 @@ function getRandomUnusedCommand(categorycommands, usedCommands, mostUsedType) {
 async function routeComponentInteraction(bot: Client, i: MessageComponentInteraction) {
 	if (i.isButton()) handleBtnPress(bot, i);
 }
+
+// test modal input area
+/* async function routeModalInteraction(bot: Client, i: ModalSubmitInteraction) {
+	console.log('enter modal ', i.customId, '   ', i.user.id);
+	/*if (i.customId === 'recModal') {
+		const toneSet = i.fields.getTextInputValue('tone');
+		await i.reply({ content: `Your favorite color is: ${toneSet}`, ephemeral: false });
+	}*/
+// }
+// ////////////////////////////////////////
 
 export default register;
 function handleBtnPress(bot: Client, i: ButtonInteraction) {
