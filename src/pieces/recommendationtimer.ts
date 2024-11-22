@@ -29,11 +29,10 @@ async function handleWeeklyWipe(bot: Client) {
 	for (let i = 0; i < usersID.length; i++) {
 		const userID = usersID[i];
 		const currentUser = await bot.mongo.collection(DB.USERS).findOne({ discordId: userID.id });
-		
 		if (currentUser !== null) {
 			const objectUser = currentUser.personalizeRec;
 			if (objectUser !== undefined) {
-				objectUser.recommendedCommands = []
+				objectUser.recommendedCommands = [];
 				await bot.mongo.collection(DB.USERS).updateOne(
 					{ discordId: currentUser.id },
 					{ $set: { personalizeRec: objectUser } });
