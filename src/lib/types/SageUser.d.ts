@@ -22,12 +22,12 @@ export interface SageUser {
 	activityLog: Array<Record<string, unknown>>;
 	feedbackLog: Array<Record<string, unknown>>;
 	personalizeRec: {
-		usertype: 'active' | 'inactive' | 'new';
+		usertype: string; // 'active' | 'inactive' | 'new';
 		mostusedCommand: string | null;
-		reccType: 'Announcements' | 'DM' | 'None';
-		frequency: 'aggressive' | 'moderate' | 'low';
-		tone: 'formal' | 'casual';
-		scheduled: 'random' | 'daily' | 'weekly';
+		reccType: string; // 'Announcements' | 'DM' | 'None';
+		frequency: string; // 'aggressive' | 'moderate' | 'low';
+		tone: string; // 'formal' | 'casual';
+		scheduled: string; // 'random' | 'daily' | 'weekly';
 		recommendedCommands: Array<string>;
 	};
 }
