@@ -1,3 +1,5 @@
+/* eslint-disable complexity */
+/* eslint-disable max-depth */
 import { Collection, Client, CommandInteraction, ApplicationCommand,
 	GuildMember, SelectMenuInteraction,
 	ModalSubmitInteraction, TextChannel, GuildMemberRoleManager,
@@ -12,6 +14,7 @@ import { Course } from '../lib/types/Course';
 import { SageUser } from '../lib/types/SageUser';
 import { CommandError } from '../lib/types/errors';
 import { verify } from '../pieces/verification';
+import { FUN_RECS, ADMIN_RECS, CONFIG_RECS, REMIND_RECS, INFO_RECS, PARTIALVIS_RECS, QUESTIONTAG_RECS, recommendationHelper, getMostUsed, logicRec } from '../lib/types/commands';
 
 const DELETE_DELAY = 10000;
 
@@ -105,6 +108,8 @@ async function handleDropdown(interaction: SelectMenuInteraction) {
 
 async function handleModalBuilder(interaction: ModalSubmitInteraction, bot: Client) {
 	const { customId, fields } = interaction;
+	const userID = interaction.user.id;
+	console.log(userID);
 	const guild = await bot.guilds.fetch(GUILDS.MAIN);
 	guild.members.fetch();
 
@@ -122,10 +127,12 @@ async function handleModalBuilder(interaction: ModalSubmitInteraction, bot: Clie
 			break;
 		}
 		case 'edit': {
+			console.log('entered edit');
 			const content = fields.getTextInputValue('content');
 			const channel = bot.channels.cache.get(fields.getTextInputValue('channel')) as TextChannel;
 			const message = await channel.messages.fetch(fields.getTextInputValue('message'));
 			await message.edit(content);
+			console.log('entered edit');
 			interaction.reply({ content: `Your message was edited.` });
 			break;
 		}
@@ -143,6 +150,47 @@ async function handleModalBuilder(interaction: ModalSubmitInteraction, bot: Clie
 			` go to <#${CHANNELS.ROLE_SELECT}> and use the proper dropdown menu.`
 				: '';
 			interaction.reply({ content: `Thank you for verifying! You can now access the rest of the server. ${enrollStr}`, ephemeral: true });
+			break;
+		}
+		// here is where the submit button on the modal updates to Mongo
+		case 'recommendationchanges': {
+			let errString = ``;
+			const entry: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: userID });
+			const userObj = entry.personalizeRec;
+			const reccType = fields.getTextInputValue('reccType');
+			const frequency = fields.getTextInputValue('frequency');
+			const tone = fields.getTextInputValue('tone');
+			const scheduled = fields.getTextInputValue('scheduled');
+			if (reccType !== '') {
+				if (reccType.toLocaleLowerCase() === 'dm' || reccType.toLocaleLowerCase() === 'announcements' || reccType.toLocaleLowerCase() === 'none') {
+					userObj.reccType = reccType;
+				} else {
+					errString += `Invalid Recommendation Type\n`;
+				}
+			}
+			if (frequency !== '') {
+				if (frequency.toLocaleLowerCase() === 'aggressive' || frequency.toLocaleLowerCase() === 'moderate' || frequency.toLocaleLowerCase() === 'low') {
+					userObj.frequency = frequency;
+				} else {
+					errString += `Invalid Tone\n`;
+				}
+			}
+			if (tone !== '') {
+				if (tone.toLocaleLowerCase() === 'casual' || tone.toLocaleLowerCase() === 'formal') {
+					userObj.tone = tone;
+				} else {
+					errString += `Invalid Frequency\n`;
+				}
+			}
+			if (scheduled !== '') {
+				if (scheduled.toLocaleLowerCase() === 'random' || scheduled.toLocaleLowerCase() === 'daily' || scheduled.toLocaleLowerCase() === 'weekly') {
+					userObj.scheduled = scheduled;
+				} else {
+					errString += `Invalid Schedule\n`;
+				}
+			}
+			interaction.reply({ content: `${errString} ${userObj.reccType} -- ${userObj.frequency} -- ${userObj.tone} -- ${userObj.scheduled}` });
+			interaction.client.mongo.collection(DB.USERS).findOneAndUpdate({ discordId: userID }, { $set: { personalizeRec: userObj } });
 			break;
 		}
 	}
@@ -190,6 +238,7 @@ export async function loadCommands(bot: Client): Promise<void> {
 		const commandModule = await import(file);
 
 		const dirs = file.split('/');
+
 		const name = dirs[dirs.length - 1].split('.')[0];
 
 		// semi type-guard, typeof returns function for classes
@@ -255,9 +304,12 @@ export async function loadCommands(bot: Client): Promise<void> {
 	console.log(`${bot.commands.size} commands loaded (${numNew} new, ${numEdited} edited).`);
 }
 
+// eslint-disable-next-line complexity
 async function runCommand(interaction: ChatInputCommandInteraction, bot: Client): Promise<unknown> {
+	console.log('-----------------');
 	const command = bot.commands.get(interaction.commandName);
-
+	console.log(command.category);
+	const currentUser = await bot.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
 	if (interaction.channel.type === ChannelType.GuildText && command.runInGuild === false) {
 		return interaction.reply({
 			content: 'This command must be run in DMs, not public channels',
@@ -287,11 +339,50 @@ async function runCommand(interaction: ChatInputCommandInteraction, bot: Client)
 		if (!success) return interaction.reply(failMessages[Math.floor(Math.random() * failMessages.length)]);
 
 		try {
+			console.log(`${currentUser.personalizeRec.reccType}`);
+			// COMMAND USAGE MAKE SURE ITS A VALID POSITION AND WILL RETURN -1 IF NOT FOUND IN THE ARRAY OF OBJECTS
+			const returnCU = await bot.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
+			const arrayCU = returnCU.commandUsage;
+			const item = arrayCU.findIndex(i => i.commandName === command.name);
+			console.log(item);
+			if (item > -1) {
+				console.log('ENTER');
+				const itemObject = arrayCU[item];
+				console.log(itemObject);
+				itemObject.commandCount += 1;
+				arrayCU[item] = itemObject;
+				bot.mongo.collection(DB.USERS).update({ discordId: interaction.user.id }, { $set: { commandUsage: arrayCU } });
+			} else {
+				const commandUsageObject = {
+					commandName: command.name,
+					commandDescription: command.description,
+					commandCount: 1,
+					commandCategory: command.category
+				};
+				bot.mongo.collection(DB.USERS).findOneAndUpdate(
+					{ discordId: interaction.user.id },
+					{ $push: { commandUsage: commandUsageObject } });
+			}
+			// console.log(interaction.user.id, '   ', bot.user.id);
+			//
+			//
+			//
+			// On command interaction run to see if they pass a random check (have the ability to get notifs even if they have it scheduled)
+			const user_ = await bot.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
+			if (user_.personalizeRec.reccType !== 'None') {
+				logicRec(user_, interaction, bot);
+			}
+			//
+			//
+			//
 			bot.commands.get(interaction.commandName).run(interaction)
 				?.catch(async (error: Error) => { // Idk if this is needed now, but keeping in case removing it breaks stuff...
 					bot.emit('error', new CommandError(error, interaction));
 					interaction.reply({ content: `An error occurred. ${MAINTAINERS} have been notified.`, ephemeral: true });
 				});
+			/* if (currentUser.personalizeRec.reccType === 'DM') {
+				bot.users.cache.get(currentUser.discordId).send(`<@${currentUser.discordId}>`);
+			}*/
 		} catch (error) {
 			bot.emit('error', new CommandError(error, interaction));
 			interaction.reply({ content: `An error occurred. ${MAINTAINERS} have been notified.`, ephemeral: true });

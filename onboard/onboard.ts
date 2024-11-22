@@ -3,9 +3,10 @@ import fs from 'fs';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 import { MongoClient } from 'mongodb';
-import { SageUser } from '@lib/types/SageUser';
+import { SageUser } from '@/lib/types/SageUser';
 import { Course } from '@lib/types/Course';
 import { BOT, DB, EMAIL, GUILDS, ROLES, FIRST_LEVEL } from '@root/config';
+import { time } from 'console';
 
 const MESSAGE = `<!DOCTYPE html>
 <html>
@@ -86,7 +87,9 @@ async function main() {
 		const hash = crypto.createHash('sha256').update(email).digest('base64').toString();
 
 		const entry: SageUser = await db.findOne({ email: email, hash: hash });
-
+		const timestamp = new Date().getDate();
+		const dayValue = new Date().toString().substring(0, 3);
+		const dayTime = new Date().getTime();
 		const newUser: SageUser = {
 			email: email,
 			hash: hash,
@@ -101,23 +104,75 @@ async function main() {
 			pii: false,
 			roles: [],
 			courses: [],
-			commandUsage: [],
-			responseTime: 0.0,
-			lastMessage: '',
-			timestampArray: []
+			activityLevel: 'active',
+			isNewUser: true,
+			messageCount: 0,
+			commandUsage: [{
+				commandName: '',
+				commandCount: 0,
+				commandType: ''
+			}],
+			responseTime: -1,
+			lastMessage: -1,
+			timestampArray: [],
+			activityLog: [{
+				activityTime: timestamp,
+				activityName: 'Onboard',
+				activityDescription: 'Joined Server',
+				activityType: 'join'
+			}],
+			feedbackLog: [],
+			personalizeRec: {
+				usertype: 'active',
+				mostusedCommand: '',
+				reccType: 'announcements',
+				frequency: 'aggressive',
+				tone: 'formal',
+				scheduled: 'random',
+				recommendedCommands: []
+			}
 		};
+		// ADDED MORE TO ACTIVITYLOG, TIMESTAMPARRAY, AND COMMANDUSAGE THEY ARE EXAMPLES OF HOW TO STORE (SET AS DEFAULTS RN)
 		/*
 			----- ADDED COMPONENTS TO USERS ----
 			commandUsage is an array that will be utilized as a dictionary of sorts which will count each use of specific commands that the user can use and input them into a count which can be
-		which can be used for activity metrics.
+			which can be used for activity metrics. (OBJECT IE {COMMAND NAME: ----, COUNT: ---},{...........})
 
 			responseTime is a double and will be set as the delta or time difference between the last message and the current,
-		this is helpful for tracking activity based on how fast they respond or send messages between their channel activity and keeps a form of record.
+			this is helpful for tracking activity based on how fast they respond or send messages between their channel activity and keeps a form of record.
 			lastMessage is a timestamp that will be utilized in the responseTime calculation such as given the timestamp of last and current the difference
-		will be used to set the value of responseTime
+			will be used to set the value of responseTime
 
 			timestampArray is an array of array that will be set between time periods etc 12:00-12:59, 1:00-1:59,.... and the other axis of the multidimensional array
 		will be M, TUE, WED, THUR, FRI, SAT, SUN then at the cross section will be a count of the users message to track peak hours and of which days
+
+			activityLevel: activityLevel describes whether the user is active, mildly inactive, moderately inactive, or highly
+			inactive which also takes into account whether or not the user is new. inactivity level will be incremented
+			if the command count for that week is 0.
+
+			isNewUser: describes whether the user is new, will set the user as new (true) when user is onboarded.
+
+			messageCount: field to track the number of messages the user has sent for that week. if the number of messages
+			is less than threshold for that week, then the activity level will be moved up and the messageCount will be
+			wiped weekly.
+
+			will be M, TUE, WED, THUR, FRI, SAT, SUN then at the cross section will be a count of the users message to track peak hours and of which days
+			(APPEND ARRAY FOR EACH DAY)(Should be one big array as the holder array [] 2nd level [[]] down will be the DAYS 3rd level [[[]]] will be HOURS)
+
+			TIMESTAMPARRAY (WILL BE TWO EMPTY ARRAY BUT WHEN MESSAGE ADD INFORMATION)
+
+			activityLog will be an array of objects that will be utilized to track activity from users such as date, time, what used, etc from discord
+			feedbackLog will be an array of objects to track question and their response (WILL BE EMPTY ARRAY BUT PUSH AN OBJECT)
+
+			personalizeRec will be an object that will be used by a modal to then allow users to alter and change how they recieve messages and recommendations
+			this is where we will determine how the user will recieve specific messages and descriptions will go into the object
+			such as:
+			- type user (active, inactive)
+			- most used command type
+			- recommendation type (default server announcements ephemeral)(announcements, last channel, DM, no suggestions, etc)
+			- aggressive or not (timer could be different for everyone or whatnot)
+			- tone of messages (casual, formal)
+			- current frequency
 		*/
 
 		if (course) {

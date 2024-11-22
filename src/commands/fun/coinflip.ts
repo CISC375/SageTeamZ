@@ -25,6 +25,7 @@ export default class extends Command {
 					name: `steve_tails.png`
 				}] });
 			}
+			interaction.followUp(`Following up!`);
 			return interaction.editReply(result);
 		}, 3000);
 	}
