@@ -54,11 +54,11 @@ async function handleWeekly(bot: Client) {
 					const returnGetMost = (await getMostUsed(bot, currentUser)).split('.');
 					const recommendation = await recommendationHelper(bot, currentUser);
 					switch (currentUser.personalizeRec.reccType) {
-						case 'DM' : {
+						case 'dm' : {
 							bot.users.cache.get(currentUser.discordId).send(`Since you've used ${returnGetMost[0]} the most.\n${recommendation}`);
 							break;
 						}
-						case 'Announcements' : {
+						case 'announcement' : {
 							const channelId = CHANNELS.ANNOUNCEMENTS;
 							const channel = bot.channels.cache.get(channelId);
 							(channel as TextChannel).send(`<@${currentUser.discordId}>\nSince you've used ${returnGetMost[0]} the most.\n${recommendation}`);
@@ -88,11 +88,11 @@ async function handleDaily(bot: Client) {
 					const returnGetMost = (await getMostUsed(bot, currentUser)).split('.');
 					const recommendation = await recommendationHelper(bot, currentUser);
 					switch (currentUser.personalizeRec.reccType) {
-						case 'DM' : {
+						case 'dm' : {
 							bot.users.cache.get(currentUser.discordId).send(`Since you've used ${returnGetMost[0]} the most.\n${recommendation}`);
 							break;
 						}
-						case 'Announcements' : {
+						case 'announcements' : {
 							const channelId = CHANNELS.ANNOUNCEMENTS;
 							const channel = bot.channels.cache.get(channelId);
 							(channel as TextChannel).send(`<@${currentUser.discordId}>\nSince you've used ${returnGetMost[0]} the most.\n${recommendation}`);

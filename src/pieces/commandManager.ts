@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 /* eslint-disable max-depth */
 import { Collection, Client, CommandInteraction, ApplicationCommand,
 	GuildMember, SelectMenuInteraction,
@@ -153,6 +154,7 @@ async function handleModalBuilder(interaction: ModalSubmitInteraction, bot: Clie
 		}
 		// here is where the submit button on the modal updates to Mongo
 		case 'recommendationchanges': {
+			let errString = ``;
 			const entry: SageUser = await interaction.client.mongo.collection(DB.USERS).findOne({ discordId: userID });
 			const userObj = entry.personalizeRec;
 			const reccType = fields.getTextInputValue('reccType');
@@ -160,19 +162,34 @@ async function handleModalBuilder(interaction: ModalSubmitInteraction, bot: Clie
 			const tone = fields.getTextInputValue('tone');
 			const scheduled = fields.getTextInputValue('scheduled');
 			if (reccType !== '') {
-				userObj.reccType = reccType;
+				if (reccType.toLocaleLowerCase() === 'dm' || reccType.toLocaleLowerCase() === 'announcements' || reccType.toLocaleLowerCase() === 'none') {
+					userObj.reccType = reccType;
+				} else {
+					errString += `Invalid Recommendation Type\n`;
+				}
 			}
 			if (frequency !== '') {
-				userObj.frequency = frequency;
+				if (frequency.toLocaleLowerCase() === 'aggressive' || frequency.toLocaleLowerCase() === 'moderate' || frequency.toLocaleLowerCase() === 'low') {
+					userObj.frequency = frequency;
+				} else {
+					errString += `Invalid Tone\n`;
+				}
 			}
 			if (tone !== '') {
-				userObj.tone = tone;
+				if (tone.toLocaleLowerCase() === 'casual' || tone.toLocaleLowerCase() === 'formal') {
+					userObj.tone = tone;
+				} else {
+					errString += `Invalid Frequency\n`;
+				}
 			}
 			if (scheduled !== '') {
-				userObj.scheduled = scheduled;
+				if (scheduled.toLocaleLowerCase() === 'random' || scheduled.toLocaleLowerCase() === 'daily' || scheduled.toLocaleLowerCase() === 'weekly') {
+					userObj.scheduled = scheduled;
+				} else {
+					errString += `Invalid Schedule\n`;
+				}
 			}
-			console.log('MODAL COMMANDMANAGER');
-			interaction.reply({ content: `${userObj.reccType} -- ${userObj.frequency} -- ${userObj.tone} -- ${userObj.scheduled}` });
+			interaction.reply({ content: `${errString} ${userObj.reccType} -- ${userObj.frequency} -- ${userObj.tone} -- ${userObj.scheduled}` });
 			interaction.client.mongo.collection(DB.USERS).findOneAndUpdate({ discordId: userID }, { $set: { personalizeRec: userObj } });
 			break;
 		}

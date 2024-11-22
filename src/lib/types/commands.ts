@@ -116,29 +116,6 @@ const NORMAL_COMMAND_STRINGS = [
 ];
 
 
-export async function recommendationService(bot: Client) {
-	const channelId = CHANNELS.ANNOUNCEMENTS;
-	const channel = bot.channels.cache.get(channelId);
-	const usersID = bot.users.cache.map(user => user);
-	for (let i = 0; i < usersID.length; i++) {
-		const userID = usersID[i];
-		const currentUser = await bot.mongo.collection(DB.USERS).findOne({ discordId: userID.id });
-		if (currentUser !== null) {
-			// console.log(currentUser.personalizeRec);
-			if (currentUser.personalizeRec !== undefined) {
-				const recommendation = await recommendationHelper(bot, currentUser);
-				// makes sure rec is returned
-				if (recommendation) {
-					console.log(recommendation);
-					// bot.users.cache.get(currentUser.discordId).send(`<@${currentUser.discordId}>`);
-					// (channel as TextChannel).send(`<@${currentUser.discordId}> ${recommendation}`);
-				}
-			}
-		}
-	}
-	// bot.login(BOT.TOKEN);
-}
-
 /* Recommend commands based on the type of most used command, and retrieve commands that are not used
    within this category type by users to recommend them to users. */
 export async function getMostUsed(bot: Client, user: SageUser) {
@@ -159,10 +136,7 @@ export async function getMostUsed(bot: Client, user: SageUser) {
 }
 
 export async function recommendationHelper(bot: Client, user: SageUser) {
-	// const x = bot.commands.get(mostUsed).type
-	// console.log(x);
 	const objectUser = user.personalizeRec;
-	const mostUsed = getMostUsed(bot, user);
 	const spliced = (await getMostUsed(bot, user)).split('.');
 	// eslint-disable-next-line prefer-destructuring
 	objectUser.mostusedCommand = spliced[0];
@@ -231,7 +205,7 @@ export function getRandomUnusedCommand(categorycommands: any[], usedCommands: an
 // Logic Rec makes sure that the logic is correct and sends the correct information
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export async function logicRec(user_ : SageUser, interaction : ChatInputCommandInteraction, bot: Client) {
-	let randNum = 19; // Math.floor(Math.random() * (20 - 1 + 1)) + 1; // The math to make it random (Between 1 and 20)
+	let randNum = Math.floor(Math.random() * (20 - 1 + 1)) + 1; // The math to make it random (Between 1 and 20)
 	if (user_.personalizeRec.scheduled === 'random' || randNum >= 15) {
 		switch (user_.personalizeRec.frequency) {
 			case 'aggressive' : {
@@ -243,12 +217,10 @@ export async function logicRec(user_ : SageUser, interaction : ChatInputCommandI
 				break;
 			}
 		}
-		console.log(randNum, ' ', bot.user.id);
 		if (randNum > 18) {
 			const recommendation = await recommendationHelper(bot, user_);
 			const splicedMost = (await getMostUsed(bot, user_)).split('.');
-			if (user_.personalizeRec.reccType === 'DM') { // Sends User a DM (Not currently recommendations, just a lil Howdy)
-				console.log('reached here - DM');
+			if (user_.personalizeRec.reccType === 'dm') { // Sends User a DM (Not currently recommendations, just a lil Howdy)
 				// eslint-disable-next-line max-depth
 				try {
 					console.log(recommendation);
@@ -256,9 +228,8 @@ export async function logicRec(user_ : SageUser, interaction : ChatInputCommandI
 				} catch (error) {
 					console.error('Failed to send DM:', error);
 				}
-			} else { // Does a followUp if the User has their reccType set to anything else
+			} else if (user_.personalizeRec.reccType === 'announcements') { // Does a followUp if the User has their reccType set to anything else
 				console.log('reached here - reply');
-				// eslint-disable-next-line max-depth
 				try {
 					console.log(recommendation);
 					// Does not currently display as ephemeral due to the the bot doing a followUp to its own reply
