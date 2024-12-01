@@ -15,6 +15,18 @@ export default class extends Command {
 			required: true
 		},
 		{
+			name: 'command',
+			description: 'The command that you want to give feedback on',
+			type: ApplicationCommandOptionType.String,
+			required: true
+		},
+		{
+			name: 'Positive Feedback',
+			description: 'True = Positive Feedback, False = Negative Feedback',
+			type: ApplicationCommandOptionType.Boolean,
+			required: true
+		},
+		{
 			name: 'file',
 			description: 'A file to be posted with the feedback',
 			type: ApplicationCommandOptionType.Attachment,
@@ -26,6 +38,8 @@ export default class extends Command {
 	async run(interaction:ChatInputCommandInteraction): Promise<InteractionResponse<boolean>> {
 		// Gets in the user's inputs for the feedback and file
 		const feedback = interaction.options.getString('feedback');
+		const command = interaction.options.getString('command');
+		const positiveFeedback = interaction.options.getBoolean('Positive Feedback');
 		const file = interaction.options.getAttachment('file');
 		const feedbackChannel = await interaction.guild.channels.fetch(CHANNELS.FEEDBACK) as TextChannel;
 
