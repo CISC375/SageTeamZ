@@ -95,7 +95,7 @@ export const STAFF = [
 	'sudoreply',
 	'warn',
 	'whois'
-]
+];
 
 const FUN_COMMAND_STRINGS = [
 	"I think you might enjoy trying \"{command}\"!",
@@ -168,8 +168,8 @@ export async function recommendationHelper(bot: Client, user: SageUser) {
 	objectUser.mostusedCommand = spliced[0];
 	const randomunusedCommand = recommendUnusedCommand(spliced[1], user);
 	if (!objectUser.recommendedCommands) {
-		objectUser.recommendedCommands = []; 
-	  }
+		objectUser.recommendedCommands = [];
+	}
 	objectUser.recommendedCommands.push(randomunusedCommand);
 	bot.mongo.collection(DB.USERS).findOneAndUpdate({ discordId: user }, { $set: { personalizeRec: objectUser } });
 	// makes sure user has a slot for most used and the type since originally it was null
@@ -213,7 +213,6 @@ export function recommendUnusedCommand(mostUsedType: string, user: { commandUsag
 		case 'staff':
 			randomUnusedCommand = getRandomUnusedCommand(STAFF, user.commandUsage, mostUsedType);
 			break;
-
 	}
 
 	return randomUnusedCommand;
