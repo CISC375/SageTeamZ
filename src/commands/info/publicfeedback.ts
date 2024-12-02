@@ -20,6 +20,7 @@ export default class extends Command {
 			type: ApplicationCommandOptionType.String,
 			required: true
 		},
+		// Change to a string that is either "positive" or "negative"
 		{
 			name: 'Positive Feedback',
 			description: 'True = Positive Feedback, False = Negative Feedback',
@@ -48,6 +49,7 @@ export default class extends Command {
 			.setAuthor({ name: interaction.user.tag, iconURL: interaction.user.avatarURL() })
 			.setTitle('New Feedback')
 			.setDescription(feedback)
+			.setFooter({ text: `Command: ${command}, Positive Feedback: ${positiveFeedback}` })
 			.setColor('DarkGreen')
 			.setTimestamp();
 

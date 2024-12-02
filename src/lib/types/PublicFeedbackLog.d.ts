@@ -4,5 +4,7 @@ export interface PublicFeedbackLog {
 	owner: string;
 	reactYes: [users];
 	reactNo: [users];
+	command: string;
+	positiveFeedback: boolean;
 	attachment: string;
 }
