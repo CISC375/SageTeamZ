@@ -22,7 +22,7 @@ export default class extends Command {
 		},
 		// Change to a string that is either "positive" or "negative"
 		{
-			name: 'Positive Feedback',
+			name: 'positiveFeedback',
 			description: 'True = Positive Feedback, False = Negative Feedback',
 			type: ApplicationCommandOptionType.Boolean,
 			required: true
@@ -40,7 +40,7 @@ export default class extends Command {
 		// Gets in the user's inputs for the feedback and file
 		const feedback = interaction.options.getString('feedback');
 		const command = interaction.options.getString('command');
-		const positiveFeedback = interaction.options.getBoolean('Positive Feedback');
+		const positiveFeedback = interaction.options.getBoolean('positiveFeedback');
 		const file = interaction.options.getAttachment('file');
 		const feedbackChannel = await interaction.guild.channels.fetch(CHANNELS.FEEDBACK) as TextChannel;
 
