@@ -220,7 +220,8 @@ export async function logicRec(user_ : SageUser, interaction : ChatInputCommandI
 		if (randNum > 18) {
 			const recommendation = await recommendationHelper(bot, user_);
 			const splicedMost = (await getMostUsed(bot, user_)).split('.');
-			if (user_.personalizeRec.reccType === 'dm') { // Sends User a DM (Not currently recommendations, just a lil Howdy)
+			if (user_.personalizeRec.reccType === 'DM') { // Sends User a DM
+				console.log('reached here - DM');
 				// eslint-disable-next-line max-depth
 				try {
 					console.log(recommendation);
@@ -232,8 +233,7 @@ export async function logicRec(user_ : SageUser, interaction : ChatInputCommandI
 				console.log('reached here - reply');
 				try {
 					console.log(recommendation);
-					// Does not currently display as ephemeral due to the the bot doing a followUp to its own reply
-					await interaction.followUp({ content: `Since you've used ${splicedMost[0]} the most.\n${recommendation}`, ephemeral: false });
+					await interaction.followUp({ content: `Since you've used ${splicedMost[0]} the most.\n${recommendation}` });
 				} catch (error) {
 					console.error('Failed to send reply or follow-up:', error);
 				}
