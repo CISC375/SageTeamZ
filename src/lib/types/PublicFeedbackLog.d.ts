@@ -5,6 +5,6 @@ export interface PublicFeedbackLog {
 	reactYes: [users];
 	reactNo: [users];
 	command: string;
-	positiveFeedback: boolean;
+	feedbackType: string;
 	attachment: string;
 }

@@ -20,12 +20,15 @@ export default class extends Command {
 			type: ApplicationCommandOptionType.String,
 			required: true
 		},
-		// Change to a string that is either "positive" or "negative"
 		{
-			name: 'positiveFeedback',
-			description: 'True = Positive Feedback, False = Negative Feedback',
-			type: ApplicationCommandOptionType.Boolean,
-			required: true
+			name: 'feedbackType',
+			description: 'What type of feedback is this? Positive or Negative?',
+			type: ApplicationCommandOptionType.String,
+			required: true,
+			choices: [
+				{ name: 'positive', value: 'positive' },
+				{ name: 'negative', value: 'negative' }
+			]
 		},
 		{
 			name: 'file',
@@ -40,7 +43,7 @@ export default class extends Command {
 		// Gets in the user's inputs for the feedback and file
 		const feedback = interaction.options.getString('feedback');
 		const command = interaction.options.getString('command');
-		const positiveFeedback = interaction.options.getBoolean('positiveFeedback');
+		const feedbackType = interaction.options.getString('feedbackType');
 		const file = interaction.options.getAttachment('file');
 		const feedbackChannel = await interaction.guild.channels.fetch(CHANNELS.FEEDBACK) as TextChannel;
 
@@ -49,11 +52,12 @@ export default class extends Command {
 			.setAuthor({ name: interaction.user.tag, iconURL: interaction.user.avatarURL() })
 			.setTitle('New Feedback')
 			.setDescription(feedback)
-			.setFooter({ text: `Command: ${command}, Positive Feedback: ${positiveFeedback}` })
+			.setFooter({ text: `Command: ${command}, Feedback Type: ${feedbackType}` })
 			.setColor('DarkGreen')
 			.setTimestamp();
 
 		if (file) embed.setImage(file.url);
+
 		// react to the sent embed with the thumbs up and thumbs down emojis
 		const message = await feedbackChannel.send({ embeds: [embed] }) as Message;
 		await message.react('👍');
