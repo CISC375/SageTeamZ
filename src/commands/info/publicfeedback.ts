@@ -43,7 +43,7 @@ export default class extends Command {
 		// Gets in the user's inputs for the feedback and file
 		const feedback = interaction.options.getString('feedback');
 		const command = interaction.options.getString('command');
-		const feedbackType = interaction.options.getString('feedbackType');
+		const feedbackType = interaction.options.getString('feedbacktype');
 		const file = interaction.options.getAttachment('file');
 		const feedbackChannel = await interaction.guild.channels.fetch(CHANNELS.FEEDBACK) as TextChannel;
 
@@ -63,7 +63,6 @@ export default class extends Command {
 		await message.react('👍');
 		await message.react('👎');
 
-		// Response to the user in the channel that the command was used in
 		return interaction.reply({ content: `Thanks! I've sent your feedback to ${MAINTAINERS}.`, ephemeral: true });
 	}
 

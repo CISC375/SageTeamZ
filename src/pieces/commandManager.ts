@@ -380,9 +380,6 @@ async function runCommand(interaction: ChatInputCommandInteraction, bot: Client)
 					bot.emit('error', new CommandError(error, interaction));
 					interaction.reply({ content: `An error occurred. ${MAINTAINERS} have been notified.`, ephemeral: true });
 				});
-			/* if (currentUser.personalizeRec.reccType === 'DM') {
-				bot.users.cache.get(currentUser.discordId).send(`<@${currentUser.discordId}>`);
-			}*/
 		} catch (error) {
 			bot.emit('error', new CommandError(error, interaction));
 			interaction.reply({ content: `An error occurred. ${MAINTAINERS} have been notified.`, ephemeral: true });
