@@ -52,8 +52,8 @@ export default class extends Command {
 			.setAuthor({ name: interaction.user.tag, iconURL: interaction.user.avatarURL() })
 			.setTitle('New Feedback')
 			.setDescription(feedback)
-			.setFooter({ text: `Command: ${command}, Feedback Type: ${feedbackType}` })
-			.setColor('DarkGreen')
+			.setFooter({ text: `Command: ${command}, Feedback Type: ${feedbackType.charAt(0).toUpperCase() + feedbackType.slice(1)}` })
+			.setColor(feedbackType === 'positive' ? 'Green' : 'Red')
 			.setTimestamp();
 
 		if (file) embed.setImage(file.url);
