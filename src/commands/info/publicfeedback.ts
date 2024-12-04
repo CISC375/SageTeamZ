@@ -21,7 +21,7 @@ export default class extends Command {
 			required: true
 		},
 		{
-			name: 'feedbackType',
+			name: 'feedbacktype',
 			description: 'What type of feedback is this? Positive or Negative?',
 			type: ApplicationCommandOptionType.String,
 			required: true,
