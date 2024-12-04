@@ -265,7 +265,8 @@ export async function loadCommands(bot: Client): Promise<void> {
 			description: command.description,
 			options: command?.options || [],
 			type: command.type || ApplicationCommandType.ChatInput,
-			defaultPermission: false
+			defaultPermission: false,
+			weight: 1
 		} as ApplicationCommandDataResolvable;
 
 		if (!guildCmd) {
@@ -282,13 +283,17 @@ export async function loadCommands(bot: Client): Promise<void> {
 
 		const oldSettings = oldCommandSettings.find(cmd => cmd.name === command.name);
 		let enable: boolean;
+		let weights: number;
 		if (oldSettings) {
 			enable = oldSettings.enabled;
+			weights = oldSettings.weight;
 		} else {
 			enable = command.enabled !== false;
-			oldCommandSettings.push({ name: command.name, enabled: enable });
+			weights = 1;
+			oldCommandSettings.push({ name: command.name, enabled: enable, weight: weights });
 		}
 		command.enabled = enable;
+		command.weight = weights;
 
 		bot.commands.set(name, command);
 

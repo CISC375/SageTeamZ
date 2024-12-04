@@ -31,7 +31,8 @@ export default class extends Command {
 		interaction.client.commands.set(command.name, command);
 
 		const { commandSettings } = await interaction.client.mongo.collection(DB.CLIENT_DATA).findOne({ _id: interaction.client.user.id }) as SageData;
-		commandSettings[commandSettings.findIndex(cmd => cmd.name === command.name)] = { name: command.name, enabled: true };
+		// weight needs to be any random number to be accepted or that it doesnt matter since to enable/disable they would also have to know what the weight is
+		commandSettings[commandSettings.findIndex(cmd => cmd.name === command.name)] = { name: command.name, enabled: true, weight: 1 };
 		interaction.client.mongo.collection(DB.CLIENT_DATA).updateOne(
 			{ _id: interaction.client.user.id },
 			{ $set: { commandSettings } },
