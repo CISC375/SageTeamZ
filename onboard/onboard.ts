@@ -138,7 +138,8 @@ async function main() {
 				tone: 'formal',
 				scheduled: 'random',
 				recommendedCommands: [],
-				group: randomGroup
+				group: randomGroup,
+				recommendationsUsed: 0
 			}
 		};
 		// ADDED MORE TO ACTIVITYLOG, TIMESTAMPARRAY, AND COMMANDUSAGE THEY ARE EXAMPLES OF HOW TO STORE (SET AS DEFAULTS RN)
