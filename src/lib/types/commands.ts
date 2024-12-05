@@ -160,7 +160,7 @@ export async function getMostUsed(bot: Client, user: SageUser) {
 
 export async function recommendationHelper(bot: Client, user: SageUser) {
 	// const x = bot.commands.get(mostUsed).type
-	// console.log(x);
+	console.log('--recc helper');
 	const objectUser = user.personalizeRec;
 	const mostUsed = getMostUsed(bot, user);
 	const spliced = (await getMostUsed(bot, user)).split('.');
@@ -182,6 +182,8 @@ export async function recommendationHelper(bot: Client, user: SageUser) {
 
 /* Retrieve commands of the same type of the most used command */
 export function recommendUnusedCommand(mostUsedType: string, user: { commandUsage: any[]; }) {
+	console.log('v Most used Type')
+	console.log(mostUsedType);
 	if (!mostUsedType) return null;
 	let randomUnusedCommand = '';
 	// find random unused command based on category
@@ -214,7 +216,7 @@ export function recommendUnusedCommand(mostUsedType: string, user: { commandUsag
 			randomUnusedCommand = getRandomUnusedCommand(STAFF, user.commandUsage, mostUsedType);
 			break;
 	}
-
+	// console.log(randomUnusedCommand);
 	return randomUnusedCommand;
 }
 
@@ -247,8 +249,9 @@ export async function logicRec(user_ : SageUser, interaction : ChatInputCommandI
 		if (randNum > 18) {
 			const recommendation = await recommendationHelper(bot, user_);
 			const splicedMost = (await getMostUsed(bot, user_)).split('.');
+			console.log(recommendation);
 			if (user_.personalizeRec.reccType === 'DM') { // Sends User a DM
-				console.log('reached here - DM');
+				console.log('reached DM');
 				// eslint-disable-next-line max-depth
 				try {
 					console.log(recommendation);
