@@ -16,7 +16,7 @@ export default class extends Command {
 			## Group Information 
 			### Group A (Aggressive Recommendations)
 			- Members: ${groupA.length} 
-			- Engagement Rate: ${this.calculateEngagementRate(groupA)}% 
+			- Reccomendations Used: ${this.calculateReccsUsed(groupA)}% 
 			### Group B (Diverse Recommendations)
 			- Members: ${groupB.length}
 			- Command Diversity: ${this.calculateCommandDiversity(groupB)} 
@@ -29,11 +29,12 @@ export default class extends Command {
 		return interaction.reply({ embeds: [responseEmbed], ephemeral: true });
 	}
 
-	private calculateEngagementRate(group: SageUser[]): number {
-		const engagedUsers = group.filter(user =>
-			user.commandUsage && user.commandUsage.some(cmd => cmd.commandCount > 0)
-		);
-		return (engagedUsers.length / group.length) * 100;
+	private calculateReccsUsed(group: SageUser[]): number {
+		let totalReccsUsed = 0;
+		for (const user of group) {
+			totalReccsUsed += user.personalizeRec.reccomendationsUsed || 0;
+		}
+		return totalReccsUsed;
 	}
 
 	private calculateCommandDiversity(group: SageUser[]): string {
