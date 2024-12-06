@@ -141,17 +141,28 @@ export async function recommendationHelper(bot: Client, user: SageUser) {
 	// eslint-disable-next-line prefer-destructuring
 	objectUser.mostusedCommand = spliced[0];
 	const randomunusedCommand = recommendUnusedCommand(spliced[1], user);
+
+	//console.log('Before Mongo Update:', objectUser.recommendedCommands);
+	//console.log('Before update:', objectUser);
+
 	if (!objectUser.recommendedCommands) {
 		objectUser.recommendedCommands = [];
 	}
-	objectUser.recommendedCommands.push(randomunusedCommand);
-	bot.mongo.collection(DB.USERS).findOneAndUpdate({ discordId: user }, { $set: { personalizeRec: objectUser } });
+
 	// makes sure user has a slot for most used and the type since originally it was null
-	if (randomunusedCommand !== null) {
+	if (randomunusedCommand) {
+		objectUser.recommendedCommands.push(randomunusedCommand);
+		// console.log('user id: ', user.discordId)
+		const updateResult = await bot.mongo.collection(DB.USERS).findOneAndUpdate({ discordId: user.discordId }, { $set: { personalizeRec: objectUser } });
+		// console.log('Mongo Update Result:', updateResult);
+
 		const messages = objectUser.tone === 'casual' ? FUN_COMMAND_STRINGS : NORMAL_COMMAND_STRINGS;
 		const randomMessage = messages[Math.floor(Math.random() * messages.length)];
 		return randomMessage.replace('{command}', randomunusedCommand);
 	}
+
+
+	
 }
 
 /* Retrieve commands of the same type of the most used command */
