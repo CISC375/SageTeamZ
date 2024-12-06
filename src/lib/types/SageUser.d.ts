@@ -24,7 +24,7 @@ export interface SageUser {
 	personalizeRec: {
 		usertype: 'active' | 'inactive' | 'new';
 		mostusedCommand: string | null;
-		reccType: 'Announcements' | 'DM' | 'None';
+		reccType: 'announcements' | 'dm' | 'none';
 		frequency: 'aggressive' | 'moderate' | 'low';
 		tone: 'formal' | 'casual';
 		scheduled: 'random' | 'daily' | 'weekly';

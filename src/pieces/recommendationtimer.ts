@@ -55,7 +55,7 @@ async function handleWeekly(bot: Client) {
 					const returnGetMost = (await getMostUsed(bot, currentUser)).split('.');
 					const recommendation = await recommendationHelper(bot, currentUser);
 					switch (currentUser.personalizeRec.reccType) {
-						case 'DM' : {
+						case 'dm' : {
 							bot.users.cache.get(currentUser.discordId).send(`Since you've used ${returnGetMost[0]} the most.\n${recommendation}`);
 							break;
 						}
