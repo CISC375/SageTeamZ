@@ -184,7 +184,7 @@ async function handleModalBuilder(interaction: ModalSubmitInteraction, bot: Clie
 			}
 			if (scheduled !== '') {
 				if (scheduled.toLocaleLowerCase() === 'random' || scheduled.toLocaleLowerCase() === 'daily' || scheduled.toLocaleLowerCase() === 'weekly') {
-					userObj.scheduled = scheduled as ('random' | 'daily' | 'weekly');
+					userObj.scheduled = scheduled as 'random' | 'daily' | 'weekly';
 				} else {
 					errString += `Invalid Schedule\n`;
 				}
