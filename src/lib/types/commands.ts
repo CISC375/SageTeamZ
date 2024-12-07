@@ -38,7 +38,8 @@ export const ADMIN_RECS = [
 	'restart',
 	'setassign',
 	'showcommands',
-	'status'
+	'status',
+	'groupab'
 ];
 
 export const CONFIG_RECS = [
@@ -151,7 +152,9 @@ export async function recommendationHelper(bot: Client, user: SageUser) {
 
 	// makes sure user has a slot for most used and the type since originally it was null
 	if (randomunusedCommand) {
-		objectUser.recommendedCommands.push(randomunusedCommand);
+		if (!objectUser.recommendedCommands.includes(randomunusedCommand)) {
+			objectUser.recommendedCommands.push(randomunusedCommand);
+		} //
 		// console.log('user id: ', user.discordId)
 		const updateResult = await bot.mongo.collection(DB.USERS).findOneAndUpdate({ discordId: user.discordId }, { $set: { personalizeRec: objectUser } });
 		// console.log('Mongo Update Result:', updateResult);
@@ -164,8 +167,6 @@ export async function recommendationHelper(bot: Client, user: SageUser) {
 
 /* Retrieve commands of the same type of the most used command */
 export function recommendUnusedCommand(mostUsedType: string, user: { commandUsage: any[]; }) {
-	console.log('v Most used Type')
-	console.log(mostUsedType);
 	if (!mostUsedType) return null;
 	let randomUnusedCommand = '';
 	// find random unused command based on category
@@ -239,7 +240,6 @@ export async function logicRec(user_ : SageUser, interaction : ChatInputCommandI
 					console.error('Failed to send DM:', error);
 				}
 			} else if (user_.personalizeRec.reccType === 'announcements') { // Does a followUp if the User has their reccType set to anything else
-				console.log('reached here - reply');
 				try {
 					console.log(recommendation);
 					// Does not currently display as ephemeral due to the the bot doing a followUp to its own reply

@@ -29,6 +29,7 @@ export interface SageUser {
 		frequency: 'aggressive' | 'moderate' | 'low';
 		tone: 'formal' | 'casual';
 		scheduled: 'random' | 'daily' | 'weekly';
+		group: string;
 		recommendedCommands: Array<string>;
 	};
 }
