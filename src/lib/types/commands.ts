@@ -140,10 +140,7 @@ export async function recommendationHelper(bot: Client, user: SageUser) {
 	const spliced = (await getMostUsed(bot, user)).split('.');
 	// eslint-disable-next-line prefer-destructuring
 	objectUser.mostusedCommand = spliced[0];
-	const randomunusedCommand = recommendUnusedCommand(spliced[1], user);
-
-	//console.log('Before Mongo Update:', objectUser.recommendedCommands);
-	//console.log('Before update:', objectUser);
+	const randomunusedCommand = recommendUnusedCommand(spliced[1], user, bot);
 
 	if (!objectUser.recommendedCommands) {
 		objectUser.recommendedCommands = [];
@@ -152,51 +149,50 @@ export async function recommendationHelper(bot: Client, user: SageUser) {
 	// makes sure user has a slot for most used and the type since originally it was null
 	if (randomunusedCommand) {
 		objectUser.recommendedCommands.push(randomunusedCommand);
-		// console.log('user id: ', user.discordId)
 		const updateResult = await bot.mongo.collection(DB.USERS).findOneAndUpdate({ discordId: user.discordId }, { $set: { personalizeRec: objectUser } });
-		// console.log('Mongo Update Result:', updateResult);
 
 		const messages = objectUser.tone === 'casual' ? FUN_COMMAND_STRINGS : NORMAL_COMMAND_STRINGS;
 		const randomMessage = messages[Math.floor(Math.random() * messages.length)];
 		return randomMessage.replace('{command}', randomunusedCommand);
 	}
-
-
 	
 }
 
 /* Retrieve commands of the same type of the most used command */
-export function recommendUnusedCommand(mostUsedType: string, user: { commandUsage: any[]; }) {
+export function recommendUnusedCommand(mostUsedType: string, user: { commandUsage: any[]; }, bot: Client) {
 	if (!mostUsedType) return null;
 	let randomUnusedCommand = '';
+	// weightThreshold to stop recommending commands that are receving mostly negative feedback
+	let weightThreshold = 0.3;
+
 	// find random unused command based on category
 	switch (mostUsedType) {
 		case 'fun':
-			randomUnusedCommand = getRandomUnusedCommand(FUN_RECS, user.commandUsage, mostUsedType);
+			randomUnusedCommand = getRandomUnusedCommand(FUN_RECS, user.commandUsage, mostUsedType, bot, weightThreshold);
 			break;
 		case 'admin':
-			randomUnusedCommand = getRandomUnusedCommand(ADMIN_RECS, user.commandUsage, mostUsedType);
+			randomUnusedCommand = getRandomUnusedCommand(ADMIN_RECS, user.commandUsage, mostUsedType, bot, weightThreshold);
 			break;
 		case 'config':
-			randomUnusedCommand = getRandomUnusedCommand(CONFIG_RECS, user.commandUsage, mostUsedType);
+			randomUnusedCommand = getRandomUnusedCommand(CONFIG_RECS, user.commandUsage, mostUsedType, bot, weightThreshold);
 			break;
 		case 'remind':
-			randomUnusedCommand = getRandomUnusedCommand(REMIND_RECS, user.commandUsage, mostUsedType);
+			randomUnusedCommand = getRandomUnusedCommand(REMIND_RECS, user.commandUsage, mostUsedType, bot, weightThreshold);
 			break;
 		case 'info':
-			randomUnusedCommand = getRandomUnusedCommand(INFO_RECS, user.commandUsage, mostUsedType);
+			randomUnusedCommand = getRandomUnusedCommand(INFO_RECS, user.commandUsage, mostUsedType, bot, weightThreshold);
 			break;
 		case 'partialvisibilityquestion':
-			randomUnusedCommand = getRandomUnusedCommand(PARTIALVIS_RECS, user.commandUsage, mostUsedType);
+			randomUnusedCommand = getRandomUnusedCommand(PARTIALVIS_RECS, user.commandUsage, mostUsedType, bot, weightThreshold);
 			break;
 		case 'questiontagging':
-			randomUnusedCommand = getRandomUnusedCommand(QUESTIONTAG_RECS, user.commandUsage, mostUsedType);
+			randomUnusedCommand = getRandomUnusedCommand(QUESTIONTAG_RECS, user.commandUsage, mostUsedType, bot, weightThreshold);
 			break;
 		case 'reminders':
-			randomUnusedCommand = getRandomUnusedCommand(REMINDERS, user.commandUsage, mostUsedType);
+			randomUnusedCommand = getRandomUnusedCommand(REMINDERS, user.commandUsage, mostUsedType, bot, weightThreshold);
 			break;
 		case 'staff':
-			randomUnusedCommand = getRandomUnusedCommand(STAFF, user.commandUsage, mostUsedType);
+			randomUnusedCommand = getRandomUnusedCommand(STAFF, user.commandUsage, mostUsedType, bot, weightThreshold);
 			break;
 	}
 
@@ -204,13 +200,44 @@ export function recommendUnusedCommand(mostUsedType: string, user: { commandUsag
 }
 
 /* Filter through all of the commands of a certain type and remove commands that have already been used
-  by user. Return a random unused command of that category */
-export function getRandomUnusedCommand(categorycommands: any[], usedCommands: any[], mostUsedType: any) {
+  by user. Return a random unused command of that category taking their weights based on feedback 
+  into account. */
+export function getRandomUnusedCommand(categoryCommands: any[], usedCommands: any[], mostUsedType: any, bot: Client, weightThreshold: number) {
+	// find all the used commands of the type of the most used commands
 	const usedCommandNames = new Set(usedCommands.filter(command => command.commandType === mostUsedType).map(command => command.commandName));
 
-	const unusedCommands = categorycommands.filter(command => !usedCommandNames.has(command.commandName));
+	const unusedCommands = categoryCommands.filter(command => 
+		{
+			const commandData = bot.commands[command];
+    		const weight = commandData?.weight || 1.0;
+			return weight >= weightThreshold && !usedCommandNames.has(command.commandName)}
+		);
+
 	if (unusedCommands.length === 0) return null;
-	return unusedCommands[Math.floor(Math.random() * unusedCommands.length)];
+
+	const weightedCommands = unusedCommands.map(command => ({
+		command,
+		weight: bot.commands[command]?.weight || 1.0
+	}))
+
+
+	/* Splits the range [0, totalWeight] into segments, incorporates weights into probability
+		of commands being selected, so that commands with more weight are more likely to be recommended. */
+	
+	const totalWeight = weightedCommands.reduce((sum, cmd) => sum + cmd.weight, 0);
+	const randomValue = Math.random() * totalWeight;
+
+	// running total of weights
+	let cumulativeWeight = 0;
+
+	for (const { command, weight } of weightedCommands) {
+		cumulativeWeight += weight;
+		if (randomValue <= cumulativeWeight) {
+			return command;
+		}
+	}
+
+	return null;
 }
 
 // Logic Rec makes sure that the logic is correct and sends the correct information
