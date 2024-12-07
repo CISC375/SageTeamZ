@@ -141,13 +141,21 @@ export async function recommendationHelper(bot: Client, user: SageUser) {
 	// eslint-disable-next-line prefer-destructuring
 	objectUser.mostusedCommand = spliced[0];
 	const randomunusedCommand = recommendUnusedCommand(spliced[1], user);
+
+	// console.log('Before Mongo Update:', objectUser.recommendedCommands);
+	// console.log('Before update:', objectUser);
+
 	if (!objectUser.recommendedCommands) {
 		objectUser.recommendedCommands = [];
 	}
-	objectUser.recommendedCommands.push(randomunusedCommand);
-	bot.mongo.collection(DB.USERS).findOneAndUpdate({ discordId: user }, { $set: { personalizeRec: objectUser } });
+
 	// makes sure user has a slot for most used and the type since originally it was null
-	if (randomunusedCommand !== null) {
+	if (randomunusedCommand) {
+		objectUser.recommendedCommands.push(randomunusedCommand);
+		// console.log('user id: ', user.discordId)
+		const updateResult = await bot.mongo.collection(DB.USERS).findOneAndUpdate({ discordId: user.discordId }, { $set: { personalizeRec: objectUser } });
+		// console.log('Mongo Update Result:', updateResult);
+
 		const messages = objectUser.tone === 'casual' ? FUN_COMMAND_STRINGS : NORMAL_COMMAND_STRINGS;
 		const randomMessage = messages[Math.floor(Math.random() * messages.length)];
 		return randomMessage.replace('{command}', randomunusedCommand);
@@ -156,6 +164,8 @@ export async function recommendationHelper(bot: Client, user: SageUser) {
 
 /* Retrieve commands of the same type of the most used command */
 export function recommendUnusedCommand(mostUsedType: string, user: { commandUsage: any[]; }) {
+	console.log('v Most used Type')
+	console.log(mostUsedType);
 	if (!mostUsedType) return null;
 	let randomUnusedCommand = '';
 	// find random unused command based on category
@@ -188,7 +198,7 @@ export function recommendUnusedCommand(mostUsedType: string, user: { commandUsag
 			randomUnusedCommand = getRandomUnusedCommand(STAFF, user.commandUsage, mostUsedType);
 			break;
 	}
-
+	// console.log(randomUnusedCommand);
 	return randomUnusedCommand;
 }
 
@@ -220,8 +230,7 @@ export async function logicRec(user_ : SageUser, interaction : ChatInputCommandI
 		if (randNum > 18) {
 			const recommendation = await recommendationHelper(bot, user_);
 			const splicedMost = (await getMostUsed(bot, user_)).split('.');
-			if (user_.personalizeRec.reccType === 'DM') { // Sends User a DM
-				console.log('reached here - DM');
+			if (user_.personalizeRec.reccType === 'dm') { // Sends User a DM (Not currently recommendations, just a lil Howdy)
 				// eslint-disable-next-line max-depth
 				try {
 					console.log(recommendation);
@@ -233,7 +242,8 @@ export async function logicRec(user_ : SageUser, interaction : ChatInputCommandI
 				console.log('reached here - reply');
 				try {
 					console.log(recommendation);
-					await interaction.followUp({ content: `Since you've used ${splicedMost[0]} the most.\n${recommendation}` });
+					// Does not currently display as ephemeral due to the the bot doing a followUp to its own reply
+					await interaction.followUp({ content: `Since you've used ${splicedMost[0]} the most.\n${recommendation}`, ephemeral: false });
 				} catch (error) {
 					console.error('Failed to send reply or follow-up:', error);
 				}
