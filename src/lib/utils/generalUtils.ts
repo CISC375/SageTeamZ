@@ -9,6 +9,7 @@ import { DB, CHANNELS, ROLE_DROPDOWNS, BOT } from '@root/config';
 import moment from 'moment';
 import { Reminder } from '@lib/types/Reminder';
 import { Course } from '@lib/types/Course';
+import { Double } from 'mongodb';
 
 export function getCommand(bot: Client, cmd: string): Command {
 	cmd = cmd.toLowerCase();
@@ -198,4 +199,8 @@ export function calcNeededExp(levelExp: number, direction: string): number {
 		return Math.floor(levelExp * xpRatio);
 	}
 	return Math.ceil(levelExp / xpRatio); // calculate exp for previous level
+}
+
+export function updateCommandWeight(command: string, weight: Double){
+	
 }
