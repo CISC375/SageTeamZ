@@ -9,8 +9,8 @@ export default class extends Command {
 
 	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const users = await interaction.client.mongo.collection(DB.USERS).find({}).toArray();
-		const groupA = users.filter(user => user.group === 'A');
-		const groupB = users.filter(user => user.group === 'B');
+		const groupA = users.filter((user: SageUser) => user.personalizeRec.frequency === 'aggressive');
+		const groupB = users.filter((user: SageUser) => user.personalizeRec.frequency !== 'aggressive');
 
 		const info = `
 			## Group Information 
