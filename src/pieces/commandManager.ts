@@ -259,7 +259,7 @@ export async function loadCommands(bot: Client): Promise<void> {
 		command.category = dirs[dirs.length - 2];
 
 		const guildCmd = commands.cache.find(cmd => cmd.name === command.name);
-
+		
 		const cmdData = {
 			name: command.name,
 			description: command.description,

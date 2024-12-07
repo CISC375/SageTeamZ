@@ -210,7 +210,7 @@ export async function updateCommandWeight(bot: Client, feedbackCommand: string, 
     const commandIndex = commandSettings.findIndex((cmd: any) => cmd.name === feedbackCommand);
 
 	//Currently an error because the weights are ints
-	commandSettings[commandIndex].weight = commandSettings[commandIndex].weight * weight.amount.valueOf();
+	commandSettings[commandIndex].weight = commandSettings[commandIndex].weight * weightChange.valueOf();
 	await bot.mongo.collection(DB.CLIENT_DATA).findOneAndUpdate(
 		{ _id: mongoClientData._id },
 		{ $set: { commandSettings: commandSettings }}
