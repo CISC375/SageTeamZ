@@ -203,14 +203,14 @@ export function calcNeededExp(levelExp: number, direction: string): number {
 
 // Used in the publicFeedback command to update the recommendation weight of the command based on the feedback. 
 export async function updateCommandWeight(bot: Client, feedbackCommand: string, weightChange: Double){
-	const mongoClientData = await bot.mongo.collection(DB.CLIENTDATA).findOne({ command: feedbackCommand });
+	const mongoClientData = await bot.mongo.collection(DB.CLIENT_DATA).findOne({ command: feedbackCommand });
 	const weight = mongoClientData.weight;
 
 	const commandSettings = mongoClientData.commandSettings;
     const commandIndex = commandSettings.findIndex((cmd: any) => cmd.name === feedbackCommand);
 
 	//Currently an error because the weights are ints
-	commandSettings[commandIndex].weight = weightChange * commandSettings[commandIndex].weight;
+	commandSettings[commandIndex].weight = commandSettings[commandIndex].weight * weight.amount.valueOf();
 	await bot.mongo.collection(DB.CLIENT_DATA).findOneAndUpdate(
 		{ _id: mongoClientData._id },
 		{ $set: { commandSettings: commandSettings }}
