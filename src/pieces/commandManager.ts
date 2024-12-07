@@ -163,28 +163,28 @@ async function handleModalBuilder(interaction: ModalSubmitInteraction, bot: Clie
 			const scheduled = fields.getTextInputValue('scheduled');
 			if (reccType !== '') {
 				if (reccType.toLocaleLowerCase() === 'dm' || reccType.toLocaleLowerCase() === 'announcements' || reccType.toLocaleLowerCase() === 'none') {
-					userObj.reccType = reccType;
+					userObj.reccType = reccType as ('announcements' | 'dm' | 'none');
 				} else {
 					errString += `Invalid Recommendation Type\n`;
 				}
 			}
 			if (frequency !== '') {
 				if (frequency.toLocaleLowerCase() === 'aggressive' || frequency.toLocaleLowerCase() === 'moderate' || frequency.toLocaleLowerCase() === 'low') {
-					userObj.frequency = frequency;
+					userObj.frequency = frequency as ('aggressive' | 'moderate' | 'low');
 				} else {
 					errString += `Invalid Tone\n`;
 				}
 			}
 			if (tone !== '') {
 				if (tone.toLocaleLowerCase() === 'casual' || tone.toLocaleLowerCase() === 'formal') {
-					userObj.tone = tone;
+					userObj.tone = tone as ('casual' | 'formal');
 				} else {
 					errString += `Invalid Frequency\n`;
 				}
 			}
 			if (scheduled !== '') {
 				if (scheduled.toLocaleLowerCase() === 'random' || scheduled.toLocaleLowerCase() === 'daily' || scheduled.toLocaleLowerCase() === 'weekly') {
-					userObj.scheduled = scheduled;
+					userObj.scheduled = scheduled as ('random' | 'daily' | 'weekly');
 				} else {
 					errString += `Invalid Schedule\n`;
 				}
