@@ -204,16 +204,31 @@ export async function recommendUnusedCommand(mostUsedType: string, user: { comma
   into account. */
 export async function getRandomUnusedCommand(categoryCommands: any[], usedCommands: any[], mostUsedType: any, bot: Client, weightThreshold: number): Promise<string | null> {
 	// find all the used commands of the type of the most used commands
-	const usedCommandNames = new Set(usedCommands.filter(command => command.commandType === mostUsedType).map(command => command.commandName));
+	const usedCommandNames = new Set(usedCommands.filter(command => command.commandCategory === mostUsedType).map(command => command.commandName));
+	// console.log(usedCommandNames);
 
 	// Retrieve all commands of a category from database
 	const commandDataList = await bot.mongo.collection(DB.CLIENT_DATA).find({
-		command: { $in: categoryCommands },
+		"commandSettings.name": { $in: categoryCommands },
 	}).toArray();
+	// console.log(JSON.stringify(commandDataList, null, 2));
 
-	// storing the commands and the weights in a map for later access
-	const commandWeightsMap = new Map(commandDataList.map((commandData) => [commandData.name, commandData.weight]));
+	// filter out all commands from database that are not in the category of mostusedType
+	const filteredCommandDataList = commandDataList.map(doc => ({
+		...doc,
+		commandSettings: doc.commandSettings.filter(setting =>
+		  categoryCommands.includes(setting.name)
+		)
+	  }));
 
+	// store command names and weights for easy retrieval later
+	const commandWeightsMap = new Map();
+	filteredCommandDataList.forEach(doc => {
+		doc.commandSettings.forEach(commandSetting => {
+			commandWeightsMap.set(commandSetting.name, commandSetting.weight);
+		})
+	})
+	
 	// filter out unused commands, along with filtering out those that received mostly negative feedback. 
 	const unusedCommands = categoryCommands.filter(
 		(command) =>
