@@ -118,7 +118,7 @@ const NORMAL_COMMAND_STRINGS = [
 
 /* Recommend commands based on the type of most used command, and retrieve commands that are not used
    within this category type by users to recommend them to users. */
-export async function getMostUsed(bot: Client, user: SageUser) {
+export function getMostUsed(bot: Client, user: SageUser) {
 	// Determine most used command for user
 	let mostUsed = '';
 	let mostUsedType = '';
@@ -137,7 +137,7 @@ export async function getMostUsed(bot: Client, user: SageUser) {
 
 export async function recommendationHelper(bot: Client, user: SageUser) {
 	const objectUser = user.personalizeRec;
-	const spliced = (await getMostUsed(bot, user)).split('.');
+	const spliced = getMostUsed(bot, user).split('.');
 	// eslint-disable-next-line prefer-destructuring
 	objectUser.mostusedCommand = spliced[0];
 	const randomunusedCommand = await recommendUnusedCommand(spliced[1], user, bot);
