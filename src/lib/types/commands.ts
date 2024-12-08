@@ -155,7 +155,6 @@ export async function recommendationHelper(bot: Client, user: SageUser) {
 		const randomMessage = messages[Math.floor(Math.random() * messages.length)];
 		return randomMessage.replace('{command}', randomunusedCommand);
 	}
-	
 }
 
 /* Retrieve commands of the same type of the most used command */
@@ -163,7 +162,7 @@ export function recommendUnusedCommand(mostUsedType: string, user: { commandUsag
 	if (!mostUsedType) return null;
 	let randomUnusedCommand = '';
 	// weightThreshold to stop recommending commands that are receving mostly negative feedback
-	let weightThreshold = 0.3;
+	const weightThreshold = 0.3;
 
 	// find random unused command based on category
 	switch (mostUsedType) {
@@ -200,30 +199,28 @@ export function recommendUnusedCommand(mostUsedType: string, user: { commandUsag
 }
 
 /* Filter through all of the commands of a certain type and remove commands that have already been used
-  by user. Return a random unused command of that category taking their weights based on feedback 
+  by user. Return a random unused command of that category taking their weights based on feedback
   into account. */
 export function getRandomUnusedCommand(categoryCommands: any[], usedCommands: any[], mostUsedType: any, bot: Client, weightThreshold: number) {
 	// find all the used commands of the type of the most used commands
 	const usedCommandNames = new Set(usedCommands.filter(command => command.commandType === mostUsedType).map(command => command.commandName));
 
-	const unusedCommands = categoryCommands.filter(command => 
-		{
-			const commandData = bot.commands[command];
-    		const weight = commandData?.weight || 1.0;
-			return weight >= weightThreshold && !usedCommandNames.has(command.commandName)}
-		);
+	const unusedCommands = categoryCommands.filter(command => {
+		const commandData = bot.commands[command];
+		const weight = commandData?.weight || 1.0;
+		return weight >= weightThreshold && !usedCommandNames.has(command.commandName);
+	});
 
 	if (unusedCommands.length === 0) return null;
 
 	const weightedCommands = unusedCommands.map(command => ({
 		command,
 		weight: bot.commands[command]?.weight || 1.0
-	}))
+	}));
 
 
 	/* Splits the range [0, totalWeight] into segments, incorporates weights into probability
 		of commands being selected, so that commands with more weight are more likely to be recommended. */
-	
 	const totalWeight = weightedCommands.reduce((sum, cmd) => sum + cmd.weight, 0);
 	const randomValue = Math.random() * totalWeight;
 

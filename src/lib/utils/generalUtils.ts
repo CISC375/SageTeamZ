@@ -201,18 +201,20 @@ export function calcNeededExp(levelExp: number, direction: string): number {
 	return Math.ceil(levelExp / xpRatio); // calculate exp for previous level
 }
 
-// Used in the publicFeedback command to update the recommendation weight of the command based on the feedback. 
-export async function updateCommandWeight(bot: Client, feedbackCommand: string, weightChange: Double){
+// Used in the publicFeedback command to update the recommendation weight of the command based on the feedback.
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export async function updateCommandWeight(bot: Client, feedbackCommand: string, weightChange: Double) {
 	const mongoClientData = await bot.mongo.collection(DB.CLIENT_DATA).findOne({ command: feedbackCommand });
-	const weight = mongoClientData.weight;
+	const { weight } = mongoClientData;
 
-	const commandSettings = mongoClientData.commandSettings;
-    const commandIndex = commandSettings.findIndex((cmd: any) => cmd.name === feedbackCommand);
+	const { commandSettings } = mongoClientData;
+	const commandIndex = commandSettings.findIndex((cmd: any) => cmd.name === feedbackCommand);
 
-	//Currently an error because the weights are ints
+	// Currently an error because the weights are ints
+	// eslint-disable-next-line operator-assignment
 	commandSettings[commandIndex].weight = commandSettings[commandIndex].weight * weightChange.valueOf();
 	await bot.mongo.collection(DB.CLIENT_DATA).findOneAndUpdate(
 		{ _id: mongoClientData._id },
-		{ $set: { commandSettings: commandSettings }}
-	); 
+		{ $set: { commandSettings: commandSettings } }
+	);
 }
