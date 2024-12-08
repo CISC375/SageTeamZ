@@ -3,6 +3,7 @@ import { DB, CHANNELS, MAINTAINERS } from '@root/config';
 import { EmbedBuilder, TextChannel, ChatInputCommandInteraction, ApplicationCommandOptionData,
 	ApplicationCommandOptionType, InteractionResponse, Message } from 'discord.js';
 import { updateCommandWeight } from '@root/src/lib/utils/generalUtils';
+import { Double } from 'mongodb';
 
 export default class extends Command {
 
@@ -60,12 +61,15 @@ export default class extends Command {
 		if (file) embed.setImage(file.url);
 
 		const commandDB: any[] = await interaction.client.mongo.collection(DB.CLIENT_DATA).find().toArray();
-		if(feedbackType === 'positive'){
+		const bot = interaction.client;
+		const weightChangePositive = new Double(1.2);
+		const weightChangeNegative = new Double(0.8);
+		if (feedbackType === 'positive') {
 			// Weight = Weight * 1.2
-			updateCommandWeight(command, 1.2);
-		} else{
+			updateCommandWeight(bot, command, weightChangePositive);
+		} else {
 			// Weight = Weight * 0.8
-			updateCommandWeight(command, 0.8);
+			updateCommandWeight(bot, command, weightChangeNegative);
 		}
 
 		// react to the sent embed with the thumbs up and thumbs down emojis
@@ -75,7 +79,5 @@ export default class extends Command {
 
 		return interaction.reply({ content: `Thanks! I've sent your feedback to ${MAINTAINERS}.`, ephemeral: true });
 	}
-
-
 
 }

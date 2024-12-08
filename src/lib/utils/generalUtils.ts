@@ -204,17 +204,27 @@ export function calcNeededExp(levelExp: number, direction: string): number {
 // Used in the publicFeedback command to update the recommendation weight of the command based on the feedback.
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export async function updateCommandWeight(bot: Client, feedbackCommand: string, weightChange: Double) {
-	const mongoClientData = await bot.mongo.collection(DB.CLIENT_DATA).findOne({ command: feedbackCommand });
-	const { weight } = mongoClientData;
+	// Find the document containing the command in the array
+	const mongoClientData = await bot.mongo.collection(DB.CLIENT_DATA).findOne({});
 
-	const { commandSettings } = mongoClientData;
-	const commandIndex = commandSettings.findIndex((cmd: any) => cmd.name === feedbackCommand);
+	if (!mongoClientData) {
+		throw new Error(`No client data found in the database.`);
+	}
 
-	// Currently an error because the weights are ints
-	// eslint-disable-next-line operator-assignment
-	commandSettings[commandIndex].weight = commandSettings[commandIndex].weight * weightChange.valueOf();
-	await bot.mongo.collection(DB.CLIENT_DATA).findOneAndUpdate(
+	const commandIndex = mongoClientData.commandSettings.findIndex(
+		(cmd: any) => cmd.name === feedbackCommand
+	);
+
+	if (commandIndex === -1) {
+		throw new Error(`Command "${feedbackCommand}" not found in commandSettings.`);
+	}
+
+	// Update the weight for the specific command
+	mongoClientData.commandSettings[commandIndex].weight *= weightChange.valueOf();
+
+	// Use updateOne to update the commandSettings array in the database
+	await bot.mongo.collection(DB.CLIENT_DATA).updateOne(
 		{ _id: mongoClientData._id },
-		{ $set: { commandSettings: commandSettings } }
+		{ $set: { commandSettings: mongoClientData.commandSettings } }
 	);
 }
