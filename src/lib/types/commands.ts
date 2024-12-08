@@ -140,7 +140,7 @@ export async function recommendationHelper(bot: Client, user: SageUser) {
 	const spliced = (await getMostUsed(bot, user)).split('.');
 	// eslint-disable-next-line prefer-destructuring
 	objectUser.mostusedCommand = spliced[0];
-	const randomunusedCommand = recommendUnusedCommand(spliced[1], user, bot);
+	const randomunusedCommand = await recommendUnusedCommand(spliced[1], user, bot);
 
 	if (!objectUser.recommendedCommands) {
 		objectUser.recommendedCommands = [];
@@ -159,7 +159,7 @@ export async function recommendationHelper(bot: Client, user: SageUser) {
 }
 
 /* Retrieve commands of the same type of the most used command */
-export function recommendUnusedCommand(mostUsedType: string, user: { commandUsage: any[]; }, bot: Client) {
+export async function recommendUnusedCommand(mostUsedType: string, user: { commandUsage: any[]; }, bot: Client) {
 	if (!mostUsedType) return null;
 	let randomUnusedCommand = '';
 	// weightThreshold to stop recommending commands that are receving mostly negative feedback
@@ -168,31 +168,31 @@ export function recommendUnusedCommand(mostUsedType: string, user: { commandUsag
 	// find random unused command based on category
 	switch (mostUsedType) {
 		case 'fun':
-			randomUnusedCommand = getRandomUnusedCommand(FUN_RECS, user.commandUsage, mostUsedType, bot, weightThreshold);
+			randomUnusedCommand = await getRandomUnusedCommand(FUN_RECS, user.commandUsage, mostUsedType, bot, weightThreshold);
 			break;
 		case 'admin':
-			randomUnusedCommand = getRandomUnusedCommand(ADMIN_RECS, user.commandUsage, mostUsedType, bot, weightThreshold);
+			randomUnusedCommand = await getRandomUnusedCommand(ADMIN_RECS, user.commandUsage, mostUsedType, bot, weightThreshold);
 			break;
 		case 'config':
-			randomUnusedCommand = getRandomUnusedCommand(CONFIG_RECS, user.commandUsage, mostUsedType, bot, weightThreshold);
+			randomUnusedCommand = await getRandomUnusedCommand(CONFIG_RECS, user.commandUsage, mostUsedType, bot, weightThreshold);
 			break;
 		case 'remind':
-			randomUnusedCommand = getRandomUnusedCommand(REMIND_RECS, user.commandUsage, mostUsedType, bot, weightThreshold);
+			randomUnusedCommand = await getRandomUnusedCommand(REMIND_RECS, user.commandUsage, mostUsedType, bot, weightThreshold);
 			break;
 		case 'info':
-			randomUnusedCommand = getRandomUnusedCommand(INFO_RECS, user.commandUsage, mostUsedType, bot, weightThreshold);
+			randomUnusedCommand = await getRandomUnusedCommand(INFO_RECS, user.commandUsage, mostUsedType, bot, weightThreshold);
 			break;
 		case 'partialvisibilityquestion':
-			randomUnusedCommand = getRandomUnusedCommand(PARTIALVIS_RECS, user.commandUsage, mostUsedType, bot, weightThreshold);
+			randomUnusedCommand = await getRandomUnusedCommand(PARTIALVIS_RECS, user.commandUsage, mostUsedType, bot, weightThreshold);
 			break;
 		case 'questiontagging':
-			randomUnusedCommand = getRandomUnusedCommand(QUESTIONTAG_RECS, user.commandUsage, mostUsedType, bot, weightThreshold);
+			randomUnusedCommand = await getRandomUnusedCommand(QUESTIONTAG_RECS, user.commandUsage, mostUsedType, bot, weightThreshold);
 			break;
 		case 'reminders':
-			randomUnusedCommand = getRandomUnusedCommand(REMINDERS, user.commandUsage, mostUsedType, bot, weightThreshold);
+			randomUnusedCommand = await getRandomUnusedCommand(REMINDERS, user.commandUsage, mostUsedType, bot, weightThreshold);
 			break;
 		case 'staff':
-			randomUnusedCommand = getRandomUnusedCommand(STAFF, user.commandUsage, mostUsedType, bot, weightThreshold);
+			randomUnusedCommand = await getRandomUnusedCommand(STAFF, user.commandUsage, mostUsedType, bot, weightThreshold);
 			break;
 	}
 
@@ -202,40 +202,47 @@ export function recommendUnusedCommand(mostUsedType: string, user: { commandUsag
 /* Filter through all of the commands of a certain type and remove commands that have already been used
   by user. Return a random unused command of that category taking their weights based on feedback 
   into account. */
-export function getRandomUnusedCommand(categoryCommands: any[], usedCommands: any[], mostUsedType: any, bot: Client, weightThreshold: number) {
+export async function getRandomUnusedCommand(categoryCommands: any[], usedCommands: any[], mostUsedType: any, bot: Client, weightThreshold: number): Promise<string | null> {
 	// find all the used commands of the type of the most used commands
 	const usedCommandNames = new Set(usedCommands.filter(command => command.commandType === mostUsedType).map(command => command.commandName));
 
-	const unusedCommands = categoryCommands.filter(command => 
-		{
-			const commandData = bot.commands[command];
-    		const weight = commandData?.weight || 1.0;
-			return weight >= weightThreshold && !usedCommandNames.has(command.commandName)}
-		);
+	// Retrieve all commands of a category from database
+	const commandDataList = await bot.mongo.collection(DB.CLIENT_DATA).find({
+		command: { $in: categoryCommands },
+	}).toArray();
+
+	// storing the commands and the weights in a map for later access
+	const commandWeightsMap = new Map(commandDataList.map((commandData) => [commandData.name, commandData.weight]));
+
+	// filter out unused commands, along with filtering out those that received mostly negative feedback. 
+	const unusedCommands = categoryCommands.filter(
+		(command) =>
+		  !usedCommandNames.has(command) &&
+		  (commandWeightsMap.get(command)) >= weightThreshold
+	  );
 
 	if (unusedCommands.length === 0) return null;
-
-	const weightedCommands = unusedCommands.map(command => ({
-		command,
-		weight: bot.commands[command]?.weight || 1.0
-	}))
-
 
 	/* Splits the range [0, totalWeight] into segments, incorporates weights into probability
 		of commands being selected, so that commands with more weight are more likely to be recommended. */
 	
-	const totalWeight = weightedCommands.reduce((sum, cmd) => sum + cmd.weight, 0);
+	let totalWeight = 0;
+	unusedCommands.forEach((command) => {
+		totalWeight += commandWeightsMap.get(command);
+	});
 	const randomValue = Math.random() * totalWeight;
 
 	// running total of weights
 	let cumulativeWeight = 0;
 
-	for (const { command, weight } of weightedCommands) {
+	for (const command of unusedCommands) {
+		const weight = commandWeightsMap.get(command);
 		cumulativeWeight += weight;
+	
 		if (randomValue <= cumulativeWeight) {
-			return command;
+		  return command;
 		}
-	}
+	  }
 
 	return null;
 }
