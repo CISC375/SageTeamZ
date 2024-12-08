@@ -155,7 +155,6 @@ export async function recommendationHelper(bot: Client, user: SageUser) {
 		const randomMessage = messages[Math.floor(Math.random() * messages.length)];
 		return randomMessage.replace('{command}', randomunusedCommand);
 	}
-	
 }
 
 /* Retrieve commands of the same type of the most used command */
@@ -163,7 +162,7 @@ export async function recommendUnusedCommand(mostUsedType: string, user: { comma
 	if (!mostUsedType) return null;
 	let randomUnusedCommand = '';
 	// weightThreshold to stop recommending commands that are receving mostly negative feedback
-	let weightThreshold = 0.3;
+	const weightThreshold = 0.3;
 
 	// find random unused command based on category
 	switch (mostUsedType) {
@@ -200,7 +199,7 @@ export async function recommendUnusedCommand(mostUsedType: string, user: { comma
 }
 
 /* Filter through all of the commands of a certain type and remove commands that have already been used
-  by user. Return a random unused command of that category taking their weights based on feedback 
+  by user. Return a random unused command of that category taking their weights based on feedback
   into account. */
 export async function getRandomUnusedCommand(categoryCommands: any[], usedCommands: any[], mostUsedType: any, bot: Client, weightThreshold: number): Promise<string | null> {
 	// find all the used commands of the type of the most used commands
@@ -209,38 +208,33 @@ export async function getRandomUnusedCommand(categoryCommands: any[], usedComman
 
 	// Retrieve all commands of a category from database
 	const commandDataList = await bot.mongo.collection(DB.CLIENT_DATA).find({
-		"commandSettings.name": { $in: categoryCommands },
+		"commandSettings.name": { $in: categoryCommands }
 	}).toArray();
 	// console.log(JSON.stringify(commandDataList, null, 2));
 
 	// filter out all commands from database that are not in the category of mostusedType
 	const filteredCommandDataList = commandDataList.map(doc => ({
 		...doc,
-		commandSettings: doc.commandSettings.filter(setting =>
-		  categoryCommands.includes(setting.name)
+		commandSettings: doc.commandSettings.filter(setting => categoryCommands.includes(setting.name)
 		)
-	  }));
+	}));
 
 	// store command names and weights for easy retrieval later
 	const commandWeightsMap = new Map();
 	filteredCommandDataList.forEach(doc => {
 		doc.commandSettings.forEach(commandSetting => {
 			commandWeightsMap.set(commandSetting.name, commandSetting.weight);
-		})
-	})
-	
-	// filter out unused commands, along with filtering out those that received mostly negative feedback. 
+		});
+	});
+	// filter out unused commands, along with filtering out those that received mostly negative feedback.
 	const unusedCommands = categoryCommands.filter(
-		(command) =>
-		  !usedCommandNames.has(command) &&
-		  (commandWeightsMap.get(command)) >= weightThreshold
-	  );
+		(command) => !usedCommandNames.has(command) && (commandWeightsMap.get(command)) >= weightThreshold
+	);
 
 	if (unusedCommands.length === 0) return null;
 
 	/* Splits the range [0, totalWeight] into segments, incorporates weights into probability
 		of commands being selected, so that commands with more weight are more likely to be recommended. */
-	
 	let totalWeight = 0;
 	unusedCommands.forEach((command) => {
 		totalWeight += commandWeightsMap.get(command);
@@ -253,11 +247,10 @@ export async function getRandomUnusedCommand(categoryCommands: any[], usedComman
 	for (const command of unusedCommands) {
 		const weight = commandWeightsMap.get(command);
 		cumulativeWeight += weight;
-	
 		if (randomValue <= cumulativeWeight) {
-		  return command;
+			return command;
 		}
-	  }
+	}
 
 	return null;
 }
