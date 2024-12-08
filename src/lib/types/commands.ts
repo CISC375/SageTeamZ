@@ -155,7 +155,6 @@ export async function recommendationHelper(bot: Client, user: SageUser) {
 		const randomMessage = messages[Math.floor(Math.random() * messages.length)];
 		return randomMessage.replace('{command}', randomunusedCommand);
 	}
-	
 }
 
 /* Retrieve commands of the same type of the most used command */
@@ -163,7 +162,7 @@ export async function recommendUnusedCommand(mostUsedType: string, user: { comma
 	if (!mostUsedType) return null;
 	let randomUnusedCommand = '';
 	// weightThreshold to stop recommending commands that are receving mostly negative feedback
-	let weightThreshold = 0.3;
+	const weightThreshold = 0.3;
 
 	// find random unused command based on category
 	switch (mostUsedType) {
@@ -200,7 +199,7 @@ export async function recommendUnusedCommand(mostUsedType: string, user: { comma
 }
 
 /* Filter through all of the commands of a certain type and remove commands that have already been used
-  by user. Return a random unused command of that category taking their weights based on feedback 
+  by user. Return a random unused command of that category taking their weights based on feedback
   into account. */
 export async function getRandomUnusedCommand(categoryCommands: any[], usedCommands: any[], mostUsedType: any, bot: Client, weightThreshold: number): Promise<string | null> {
 	// find all the used commands of the type of the most used commands
