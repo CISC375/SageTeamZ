@@ -1,11 +1,22 @@
-import { ChatInputCommandInteraction, EmbedBuilder, InteractionResponse } from 'discord.js';
+import { ApplicationCommandOptionData, ApplicationCommandOptionType, ApplicationCommandPermissions, ChatInputCommandInteraction, EmbedBuilder, InteractionResponse } from 'discord.js';
 import { Command } from '@lib/types/Command';
 import { SageUser } from '@root/src/lib/types/SageUser';
 import { DB } from '@root/config';
 
 export default class extends Command {
 
+	name = 'groupab';
 	description = 'Display information about Groups A and B';
+	category = 'info';
+	options: ApplicationCommandOptionData[] = [
+		{
+			name: 'groupab',
+			description: 'Display information about Groups A and B',
+			type: ApplicationCommandOptionType.String,
+			required: true
+		}
+	];
+
 
 	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const users = await interaction.client.mongo.collection(DB.USERS).find({}).toArray();
