@@ -262,7 +262,7 @@ export async function loadCommands(bot: Client): Promise<void> {
 async function runCommand(interaction: ChatInputCommandInteraction, bot: Client): Promise<unknown> {
 	console.log('-----------------');
 	const command = bot.commands.get(interaction.commandName);
-	console.log(command.category);
+	// console.log(command.category);
 	const currentUser = await bot.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
 	if (currentUser.personalizeRec.group === 'A') {
 		if (currentUser.personalizeRec.recommendedCommands.includes(interaction.commandName)) {
