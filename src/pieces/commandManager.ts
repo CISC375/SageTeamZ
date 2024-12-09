@@ -267,10 +267,10 @@ async function runCommand(interaction: ChatInputCommandInteraction, bot: Client)
 	// console.log(command.category);
 	const currentUser = await bot.mongo.collection(DB.USERS).findOne({ discordId: interaction.user.id });
 	if (currentUser.personalizeRec.group === 'A') {
-		if (currentUser.personalizeRec.recommendedCommands.includes(interaction.commandName)) {
-			currentUser.personalizeRec.recommendationsUsed += 1;
-			console.log('Recommendations Used:', currentUser.personalizeRec.recommendationsUsed);
-		}
+		await bot.mongo.collection(DB.USERS).updateOne(
+			{ discordId: interaction.user.id },
+			{ $inc: { 'personalizeRec.recommendationsUsed': 1 } });
+		console.log('Recommendations Used incremented by 1');
 	}
 	if (interaction.channel.type === ChannelType.GuildText && command.runInGuild === false) {
 		return interaction.reply({

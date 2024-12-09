@@ -18,14 +18,17 @@ export default class extends Command {
 		const groupB = users.filter((user) => user.personalizeRec && user.personalizeRec.frequency !== 'aggressive');
 
 		const info = `
-			## Group Information 
-			### Group A (Aggressive Recommendations)
-			- Members: ${groupA.length} 
-			- Reccomendations Used: ${this.calculateReccsUsed(groupA)}% 
-			### Group B (Diverse Recommendations)
+			## Group Information
+
+			Group A (Aggressive Recommendations)
+			- Members: ${groupA.length}
+			- Recommendations Used: ${this.calculateReccsUsed(groupA)}
+
+			Group B (Diverse Recommendations)
 			- Members: ${groupB.length}
-			- Command Diversity: ${this.calculateCommandDiversity(groupB)} 
-			For detailed user information, use the /userinfo command.`;
+			- Command Diversity: ${this.calculateCommandDiversity(groupB)}
+
+			For detailed user information, use the \`/userinfo\` command.`;
 		const responseEmbed = new EmbedBuilder()
 			.setColor('#add8e6')
 			.setTitle('Group Information Report')
@@ -37,7 +40,9 @@ export default class extends Command {
 	private calculateReccsUsed(group: SageUser[]): number {
 		let totalReccsUsed = 0;
 		for (const user of group) {
-			totalReccsUsed += user.personalizeRec.reccomendationsUsed || 0;
+			if (!isNaN(Number(user.personalizeRec.recommendationsUsed))) {
+				totalReccsUsed += user.personalizeRec.recommendationsUsed;
+			}
 		}
 		return totalReccsUsed;
 	}

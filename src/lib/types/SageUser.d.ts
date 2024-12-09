@@ -22,7 +22,7 @@ export interface SageUser {
 	activityLog: Array<Record<string, unknown>>;
 	feedbackLog: Array<Record<string, unknown>>;
 	personalizeRec: {
-		reccomendationsUsed: number;
+		recommendationsUsed: number;
 		usertype: 'active' | 'inactive' | 'new';
 		mostusedCommand: string | null;
 		reccType: 'announcements' | 'dm' | 'none';
