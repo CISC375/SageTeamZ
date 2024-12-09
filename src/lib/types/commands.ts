@@ -235,7 +235,7 @@ export async function logicRec(user_ : SageUser, interaction : ChatInputCommandI
 				// eslint-disable-next-line max-depth
 				try {
 					console.log(recommendation);
-					await interaction.user.send(`Since you've used ${splicedMost[0]} the most.\n${recommendation}`);
+					// await interaction.user.send(`Since you've used ${splicedMost[0]} the most.\n${recommendation}`);
 				} catch (error) {
 					console.error('Failed to send DM:', error);
 				}
