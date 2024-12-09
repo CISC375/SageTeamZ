@@ -34,7 +34,8 @@ export default class extends Command {
 		interaction.client.commands.set(command.name, command);
 
 		const { commandSettings } = await interaction.client.mongo.collection(DB.CLIENT_DATA).findOne({ _id: interaction.client.user.id }) as SageData;
-		commandSettings[commandSettings.findIndex(cmd => cmd.name === command.name)] = { name: command.name, enabled: false };
+		commandSettings[commandSettings.findIndex(cmd => cmd.name === command.name)].weight = 1;
+		commandSettings[commandSettings.findIndex(cmd => cmd.name === command.name)] = { name: command.name, enabled: false, weight: 1 };
 		interaction.client.mongo.collection(DB.CLIENT_DATA).updateOne(
 			{ _id: interaction.client.user.id },
 			{ $set: { commandSettings } },

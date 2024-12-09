@@ -63,6 +63,14 @@ async function main() {
 		course = await client.db(BOT.NAME).collection(DB.COURSES).findOne({ name: courseId });
 	}
 
+	const randomGroup = Math.random() < 0.5 ? 'A' : 'B';
+	let frequencyType = '';
+	if (randomGroup === 'A') {
+		frequencyType = 'aggressive';
+	} else {
+		frequencyType = 'low';
+	}
+
 	let isStaff: boolean;
 
 	if (emails[0].toLowerCase() === 'staff') {
@@ -126,10 +134,12 @@ async function main() {
 				usertype: 'active',
 				mostusedCommand: '',
 				reccType: 'announcements',
-				frequency: 'aggressive',
+				frequency: frequencyType,
 				tone: 'formal',
 				scheduled: 'random',
-				recommendedCommands: []
+				recommendedCommands: [],
+				group: randomGroup,
+				recommendationsUsed: 0
 			}
 		};
 		// ADDED MORE TO ACTIVITYLOG, TIMESTAMPARRAY, AND COMMANDUSAGE THEY ARE EXAMPLES OF HOW TO STORE (SET AS DEFAULTS RN)
@@ -144,7 +154,7 @@ async function main() {
 			will be used to set the value of responseTime
 
 			timestampArray is an array of array that will be set between time periods etc 12:00-12:59, 1:00-1:59,.... and the other axis of the multidimensional array
-		will be M, TUE, WED, THUR, FRI, SAT, SUN then at the cross section will be a count of the users message to track peak hours and of which days
+			will be M, TUE, WED, THUR, FRI, SAT, SUN then at the cross section will be a count of the users message to track peak hours and of which days
 
 			activityLevel: activityLevel describes whether the user is active, mildly inactive, moderately inactive, or highly
 			inactive which also takes into account whether or not the user is new. inactivity level will be incremented

@@ -9,6 +9,7 @@ import { DB, CHANNELS, ROLE_DROPDOWNS, BOT } from '@root/config';
 import moment from 'moment';
 import { Reminder } from '@lib/types/Reminder';
 import { Course } from '@lib/types/Course';
+import { Double, MongoClient } from 'mongodb';
 
 export function getCommand(bot: Client, cmd: string): Command {
 	cmd = cmd.toLowerCase();
@@ -198,4 +199,32 @@ export function calcNeededExp(levelExp: number, direction: string): number {
 		return Math.floor(levelExp * xpRatio);
 	}
 	return Math.ceil(levelExp / xpRatio); // calculate exp for previous level
+}
+
+// Used in the publicFeedback command to update the recommendation weight of the command based on the feedback.
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export async function updateCommandWeight(bot: Client, feedbackCommand: string, weightChange: Double) {
+	// Find the document containing the command in the array
+	const mongoClientData = await bot.mongo.collection(DB.CLIENT_DATA).findOne({});
+
+	if (!mongoClientData) {
+		throw new Error(`No client data found in the database.`);
+	}
+
+	const commandIndex = mongoClientData.commandSettings.findIndex(
+		(cmd: any) => cmd.name === feedbackCommand
+	);
+
+	if (commandIndex === -1) {
+		throw new Error(`Command "${feedbackCommand}" not found in commandSettings.`);
+	}
+
+	// Update the weight for the specific command
+	mongoClientData.commandSettings[commandIndex].weight *= weightChange.valueOf();
+
+	// Use updateOne to update the commandSettings array in the database
+	await bot.mongo.collection(DB.CLIENT_DATA).updateOne(
+		{ _id: mongoClientData._id },
+		{ $set: { commandSettings: mongoClientData.commandSettings } }
+	);
 }

@@ -14,7 +14,7 @@ export abstract class Command {
 	description: string;
 	usage?: string;
 	extendedHelp?: string;
-	runInDM?: boolean = true;
+	runInDM?: boolean = false;
 	runInGuild?: boolean = true;
 	options?: ApplicationCommandOptionData[];
 	type?: ApplicationCommandType;
@@ -23,6 +23,7 @@ export abstract class Command {
 		type: ApplicationCommandPermissionType.Role,
 		permission: true
 	}];
+	weight: number;
 
 	// functions
 	abstract run(interaction: CommandInteraction | MessageContextMenuCommandInteraction): Promise<InteractionResponse<boolean> | void | Message<boolean>>;
