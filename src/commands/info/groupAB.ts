@@ -6,6 +6,11 @@ import { DB } from '@root/config';
 export default class extends Command {
 
 	description = 'Display information about Groups A and B';
+	name = 'groupab';
+	category = 'info';
+	enabled = true;
+	runInDM = false;
+	runInGuild = true;
 
 	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const users = await interaction.client.mongo.collection(DB.USERS).find({}).toArray();
