@@ -4,7 +4,7 @@ import { BOT, GITHUB_PROJECT } from '@root/config';
 import { Command } from '@lib/types/Command';
 import { ApplicationCommandOptionData, ApplicationCommandOptionType, ApplicationCommandPermissions, ChatInputCommandInteraction, InteractionResponse } from 'discord.js';
 
-export class Issue extends Command {
+export default class extends Command {
 
 	description = `Creates an issue in ${BOT.NAME}'s repository.`;
 	permissions: ApplicationCommandPermissions[] = [ADMIN_PERMS];

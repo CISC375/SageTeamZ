@@ -5,12 +5,12 @@ import { DB } from '@root/config';
 
 export default class extends Command {
 
-	description = 'Display information about Groups A and B';
 	name = 'groupab';
 	category = 'info';
 	enabled = true;
+	description = 'Display information about Groups A and B';
 	runInDM = false;
-	runInGuild = true;
+	runInGuild?: boolean = true;
 
 	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const users = await interaction.client.mongo.collection(DB.USERS).find({}).toArray();

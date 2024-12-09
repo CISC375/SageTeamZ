@@ -177,6 +177,7 @@ export async function handleButton(interaction: ButtonInteraction): Promise<void
 }
 
 export async function loadCommands(bot: Client): Promise<void> {
+	console.log('Before loadCommand Error');
 	bot.commands = new Collection();
 	const sageData = await bot.mongo.collection(DB.CLIENT_DATA).findOne({ _id: bot.user.id }) as SageData;
 	const oldCommandSettings = sageData?.commandSettings || [];
@@ -194,6 +195,7 @@ export async function loadCommands(bot: Client): Promise<void> {
 		const dirs = file.split('/');
 
 		const name = dirs[dirs.length - 1].split('.')[0];
+		// console.log('Loading command from file:', file);
 
 		// semi type-guard, typeof returns function for classes
 		if (!(typeof commandModule.default === 'function')) {

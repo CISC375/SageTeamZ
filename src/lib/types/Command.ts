@@ -14,7 +14,7 @@ export abstract class Command {
 	description: string;
 	usage?: string;
 	extendedHelp?: string;
-	runInDM?: boolean = true;
+	runInDM?: boolean = false;
 	runInGuild?: boolean = true;
 	options?: ApplicationCommandOptionData[];
 	type?: ApplicationCommandType;
