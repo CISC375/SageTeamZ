@@ -10,7 +10,7 @@ async function register(bot: Client): Promise<void> {
 	handleWeekly(bot);
 	handleDaily(bot);
 	handleWeeklyWipe(bot);
-	schedule('1 2 * * 0', () => { // this should be run every week
+	schedule('* * * * *', () => { // this should be run every week
 		handleWeekly(bot)
 			.catch(async error => bot.emit('error', error));
 	});
@@ -55,6 +55,7 @@ async function handleWeekly(bot: Client) {
 					const recommendation = await recommendationHelper(bot, currentUser);
 					switch (currentUser.personalizeRec.reccType) {
 						case 'dm' : {
+							console.log('Attempting to send DM to user:', currentUser.discordId);
 							bot.users.cache.get(currentUser.discordId).send(`Since you've used ${returnGetMost[0]} the most.\n${recommendation}`);
 							break;
 						}

@@ -23,6 +23,7 @@ export abstract class Command {
 		type: ApplicationCommandPermissionType.Role,
 		permission: true
 	}];
+	weight: number;
 
 	// functions
 	abstract run(interaction: CommandInteraction | MessageContextMenuCommandInteraction): Promise<InteractionResponse<boolean> | void | Message<boolean>>;
